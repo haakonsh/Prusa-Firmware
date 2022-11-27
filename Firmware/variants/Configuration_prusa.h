@@ -75,6 +75,7 @@
 // Canceled home position
 #define X_CANCEL_POS 50
 #define Y_CANCEL_POS 190
+#define Z_CANCEL_LIFT 50
 
 //Pause print position
 #define X_PAUSE_POS 50
@@ -358,6 +359,8 @@
 //#define EXTRUDER_ALTFAN_DETECT
 #define EXTRUDER_ALTFAN_SPEED_SILENT 128
 
+#define FANCHECK_AUTO_PRINT_FAN_THRS 70 //[RPS] - Used during selftest to identify swapped fans automatically
+#define FANCHECK_AUTO_FAIL_THRS 20 //[RPS] - Used during selftest to identify a faulty fan
 
 
 /*------------------------------------
@@ -417,6 +420,34 @@
 
 #define TEMP_RUNAWAY_EXTRUDER_HYSTERESIS 15
 #define TEMP_RUNAWAY_EXTRUDER_TIMEOUT 45
+
+// model-based temperature check
+#define TEMP_MODEL 1          // enable model-based temperature checks
+#define TEMP_MODEL_DEBUG 1    // extended runtime logging
+
+#define TEMP_MODEL_P 38.      // heater power (W)
+
+#define TEMP_MODEL_C 12.1     // initial guess for heatblock capacitance (J/K)
+#define TEMP_MODEL_Cl 5       // C estimation lower limit
+#define TEMP_MODEL_Ch 20      // C estimation upper limit
+#define TEMP_MODEL_C_thr 0.01 // C estimation iteration threshold
+#define TEMP_MODEL_C_itr 30   // C estimation iteration limit
+
+#define TEMP_MODEL_R 20.5     // initial guess for heatblock resistance (K/W)
+#define TEMP_MODEL_Rl 5       // R estimation lower limit
+#define TEMP_MODEL_Rh 50      // R estimation upper limit
+#define TEMP_MODEL_R_thr 0.01 // R estimation iteration threshold
+#define TEMP_MODEL_R_itr 30   // R estimation iteration limit
+
+#define TEMP_MODEL_Ta_corr -7 // Default ambient temperature correction
+#define TEMP_MODEL_LAG 2.1    // Temperature transport delay (s)
+
+#define TEMP_MODEL_W 1.2      // Default warning threshold (K/s)
+#define TEMP_MODEL_E 1.74     // Default error threshold (K/s)
+
+#define TEMP_MODEL_CAL_Th 230 // Default calibration working temperature (C)
+#define TEMP_MODEL_CAL_Tl 50  // Default calibration cooling temperature (C)
+
 
 /*------------------------------------
  MOTOR CURRENT SETTINGS
@@ -679,5 +710,17 @@
 
 //#define MMU_ALWAYS_CUT
 #define MMU_IDLER_SENSOR_ATTEMPTS_NR 21 //max. number of attempts to load filament if first load failed; value for max bowden length and case when loading fails right at the beginning
+
+// Default Arc Interpolation Settings (Now configurable via M214)
+#define DEFAULT_N_ARC_CORRECTION       25 // Number of interpolated segments between corrections.
+/* A value of 1 or less for N_ARC_CORRECTION will trigger the use of Sin and Cos for every arc, which will improve accuracy at the
+   cost of performance*/
+#define DEFAULT_MM_PER_ARC_SEGMENT     1.0f // REQUIRED - The enforced maximum length of an arc segment
+#define DEFAULT_MIN_MM_PER_ARC_SEGMENT 0.5f //the enforced minimum length of an interpolated segment
+   /*  MIN_MM_PER_ARC_SEGMENT Must be smaller than MM_PER_ARC_SEGMENT.  Only has an effect if MIN_ARC_SEGMENTS > 0
+       or ARC_SEGMENTS_PER_SEC > 0 .  If both MIN_ARC_SEGMENTS and ARC_SEGMENTS_PER_SEC is defined, the minimum
+       calculated segment length is used. */
+#define DEFAULT_MIN_ARC_SEGMENTS 20 // The enforced minimum segments in a full circle of the same radius.  Set to 0 to disable
+#define DEFAULT_ARC_SEGMENTS_PER_SEC 0 // Use feedrate to choose segment length. Set to 0 to disable
 
 #endif //__CONFIGURATION_PRUSA_H
