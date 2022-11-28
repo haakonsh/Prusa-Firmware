@@ -2284,7 +2284,8 @@ static void check_min_temp_raw()
             bCheckingOnBed=bCheckingOnBed||(current_temperature_bed_isr>(BED_MINTEMP+TEMP_HYSTERESIS)); // for eventually delay cutting
             if(oTimer4minTempBed.expired(BED_MINTEMP_DELAY)||(!oTimer4minTempBed.running())||bCheckingOnBed) {
                 bCheckingOnBed=true;  // not necessary
-                check_min_temp_bed(); // delay is elapsed or temperature is/was over minTemp => periodical checking is active
+                //check_min_temp_bed(); // delay is elapsed or temperature is/was over minTemp => periodical checking is active
+                //TODO: Uncomment
             }
         }
         else {
@@ -2298,7 +2299,7 @@ static void check_min_temp_raw()
     else {
         // ambient temperature is standard
         check_min_temp_heater0();
-        check_min_temp_bed();
+        //check_min_temp_bed(); TODO: Uncomment
     }
 #endif //AMBIENT_THERMISTOR
 }
