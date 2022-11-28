@@ -135,7 +135,7 @@
 #define UVLO_SUPPORT
 
 // Fan check
-//#define FANCHECK
+#define FANCHECK
 
 // Safety timer
 #define SAFETYTIMER
@@ -696,6 +696,8 @@
 #define M600_TIMEOUT 600  //seconds
 
 //#define SUPPORT_VERBOSITY
+
+#define MMU_FILAMENT_COUNT 5
 
 #define MMU_REQUIRED_FW_BUILDNR 83
 #define MMU_HWRESET
