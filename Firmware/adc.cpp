@@ -34,7 +34,15 @@ static void adc_reset()
     adc_count = 0;
     adc_channel = 0;
     adc_channel_idx = first_channel_idx;
-    adc_setmux(adc_channel_idx);
+    //adc_setmux(adc_channel_idx); 
+    /* 
+    * First channel is T0, so we can highjack adc_reset() to /
+    * setup differential-inputs on the first channel, without/
+    * changing adc_setmux() itself.                          /
+    * PDI: ADC1, NDI: ADC0, Gain: 10x --> MUX5:0 = 0x9       /
+    */
+    ADMUX = (ADMUX & ~(0x1F)) | (0x9 & 0x1F);
+
     memset((void*)adc_values, 0, sizeof(adc_values));
 }
 
