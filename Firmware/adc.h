@@ -16,7 +16,7 @@ http://resnet.uoregon.edu/~gurney_j/jmpc/bitwise.html
 #endif
 
 extern volatile uint8_t adc_channel;
-extern volatile uint16_t adc_values[ADC_CHAN_CNT];
+extern volatile int16_t adc_values[ADC_CHAN_CNT]; // Changed from uint to int for differential inputs
 
 extern void adc_init();
 extern void adc_start_cycle(); //should be called from an atomic context only

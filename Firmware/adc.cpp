@@ -9,7 +9,7 @@
 static uint8_t adc_count; //used for oversampling
 static uint8_t adc_channel_idx; //bitmask index
 volatile uint8_t adc_channel; //regular index
-volatile uint16_t adc_values[ADC_CHAN_CNT];
+volatile int16_t adc_values[ADC_CHAN_CNT];  // Changed from uint to int for differential inputs
 
 static void adc_reset();
 static void adc_setmux(uint8_t ch);
