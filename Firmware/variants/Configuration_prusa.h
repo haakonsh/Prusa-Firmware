@@ -171,7 +171,7 @@
 #define DEBUG_DCODE3
 #define DEBUG_DCODE6
 
-//#define DEBUG_BUILD
+#define DEBUG_BUILD     //Uncomment to disable DEBUG mode
 //#define DEBUG_SEC_LANG   //secondary language debug output at startup
 //#define DEBUG_XFLASH   //debug external spi flash
 #ifdef DEBUG_BUILD
@@ -189,7 +189,7 @@
 //#define DEBUG_DISABLE_ZMINLIMIT  //z min limit ignored
 //#define DEBUG_DISABLE_ZMAXLIMIT  //z max limit ignored
 #define DEBUG_DISABLE_STARTMSGS //no startup messages 
-//#define DEBUG_DISABLE_MINTEMP   //mintemp error ignored
+#define DEBUG_DISABLE_MINTEMP   //mintemp error ignored
 //#define DEBUG_DISABLE_SWLIMITS  //sw limits ignored
 //#define DEBUG_DISABLE_LCD_STATUS_LINE  //empty four lcd line
 //#define DEBUG_DISABLE_PREVENT_EXTRUDER //cold extrusion and long extrusion allowed
