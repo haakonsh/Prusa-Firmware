@@ -1590,7 +1590,7 @@ void check_max_temp_raw()
 #else
     if (current_temperature_bed_raw >= bed_maxttemp_raw) {
 #endif
-        set_temp_error(TempErrorSource::bed, 0, TempErrorType::max);
+        //set_temp_error(TempErrorSource::bed, 0, TempErrorType::max); //TODO: Disabled the bed maxtemp error
     }
 #endif
     //ambient
