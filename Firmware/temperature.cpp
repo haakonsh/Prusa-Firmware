@@ -1600,7 +1600,7 @@ void check_max_temp_raw()
 #else
     if (current_temperature_raw_ambient >= ambient_maxttemp_raw) {
 #endif
-        set_temp_error(TempErrorSource::ambient, 0, TempErrorType::max);
+        //set_temp_error(TempErrorSource::ambient, 0, TempErrorType::max);/TODO: Disabled the ambient maxtemp error
     }
 #endif
 }
@@ -2104,6 +2104,15 @@ void adc_callback()
     current_voltage_raw_IR = adc_values[ADC_PIN_IDX(VOLT_IR_PIN)];
 #endif //IR_SENSOR_ANALOG
     adc_values_ready = true;
+
+    /* Print raw adc_values array*/
+
+    for(uint q = 0; q < (sizeof(adc_values)/2); q++)
+    {
+      SERIAL_PROTOCOL("\n");
+      SERIAL_PROTOCOL("adc_values in decimal:\n");
+      SERIAL_PROTOCOLLN(adc_values[q], DEC);
+    }
 }
 
 static void setCurrentTemperaturesFromIsr()
