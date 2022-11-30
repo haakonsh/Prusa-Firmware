@@ -185,6 +185,8 @@
 # 12 Jul 2022, 3d-gussner, Check if FW_FLAVAVOR and FW_FLAVERSION are correct
 
 SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
+SCRIPT_PATH_W=$(cygpath -w $SCRIPT_PATH)
+
 export SRCDIR=$SCRIPT_PATH
 
 #### Start: Failures
@@ -214,12 +216,13 @@ esac
 #### Start: Check for options/flags
 ##check_options()
 ##{
-while getopts b:c:d:g:h:i:j:l:m:n:o:p:v:x:y:?h flag
+while getopts b:c:d:f:g:h:i:j:l:m:n:o:p:v:x:y:?h flag
     do
         case "${flag}" in
             b) build_flag=${OPTARG};;
             c) clean_flag=${OPTARG};;
             d) devel_flag=${OPTARG};;
+            f) flash_device_flag=1;;
             g) mk404_graphics_flag=${OPTARG};;
             h) help_flag=1;;
             i) IDE_flag=${OPTARG};;
@@ -568,6 +571,7 @@ output_useful_data()
 {
 echo
 echo "Script path :" $SCRIPT_PATH
+echo "Script path Windows:" $SCRIPT_PATH_W
 echo "OS          :" $OS
 echo "OS type     :" $TARGET_OS
 echo ""
@@ -1468,6 +1472,27 @@ ls -r -h $SCRIPT_PATH/../PF-build-hex/FW$FW-Build$BUILD/*
 #### End: Finish script
 #### End: building
 
+#### Start: Flash device script
+# Flash the newly built fw to a connected device
+flash_device()
+{
+cd $SCRIPT_PATH
+echo "$(tput setaf 2) "
+echo " "
+failures 0
+#Check if exactly the same hexfile already exists
+    if [[ -f "$SCRIPT_PATH/../$OUTPUT_FOLDER/$OUTPUT_FILENAME.hex"  &&  "$LANGUAGES" == "ALL" ]]; then
+        echo "Flashing firmware"
+        $SCRIPT_PATH_W/avrdude-6.4-mingw32/avrdude.exe -v -p atmega2560 -c wiring -P COM3 -b 115200 -D -U flash:w:$SCRIPT_PATH_W/../$OUTPUT_FOLDER/$OUTPUT_FILENAME.hex:i
+        echo "Firmware flashed and verified!"
+    
+    elif [[ -f "$SCRIPT_PATH/../$OUTPUT_FOLDER/$OUTPUT_FILENAME-EN_FARM.hex"  &&  "$LANGUAGES" == "EN_FARM" ]]; then
+        echo "Flashing firmware"        
+        $SCRIPT_PATH_W/avrdude-6.4-mingw32/avrdude.exe -v -p atmega2560 -c wiring -P COM3 -b 115200 -D -U flash:w:$SCRIPT_PATH_W/../$OUTPUT_FOLDER/$OUTPUT_FILENAME-$LANGUAGES.hex:i
+        echo "Firmware flashed and verified!"
+    fi
+}
+#### End: Flash device script
 
 ####Start: MK404 Simulator
 MK404_SIM()
@@ -1629,6 +1654,9 @@ do
     cleanup_firmware
 done
 finish_pf-build
+if [ "$flash_device_flag" == "1" ] ; then
+    flash_device
+fi
 if [ $TARGET_OS == "linux" ]; then
     MK404_SIM
 fi
