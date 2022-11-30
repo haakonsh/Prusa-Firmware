@@ -304,14 +304,14 @@
  *------------------------------------*/
 
 // Mintemps
-#define HEATER_0_MINTEMP 10
-#define HEATER_1_MINTEMP 5
-#define HEATER_2_MINTEMP 5
+#define HEATER_0_MINTEMP 0 //TODO: default 10
+#define HEATER_1_MINTEMP 0 //TODO: default 5
+#define HEATER_2_MINTEMP 0 //TODO: default 5
 #define HEATER_MINTEMP_DELAY 15000                // [ms] ! if changed, check maximal allowed value @ ShortTimer
 #if HEATER_MINTEMP_DELAY>USHRT_MAX
 #error "Check maximal allowed value @ ShortTimer (see HEATER_MINTEMP_DELAY definition)"
 #endif
-#define BED_MINTEMP 10
+#define BED_MINTEMP 0 //TODO: default 10
 #define BED_MINTEMP_DELAY 50000                   // [ms] ! if changed, check maximal allowed value @ ShortTimer
 #if BED_MINTEMP_DELAY>USHRT_MAX
 #error "Check maximal allowed value @ ShortTimer (see BED_MINTEMP_DELAY definition)"
@@ -325,12 +325,12 @@
 #if defined(E3D_PT100_EXTRUDER_WITH_AMP) || defined(E3D_PT100_EXTRUDER_NO_AMP)
 #define HEATER_0_MAXTEMP 410
 #else
-#define HEATER_0_MAXTEMP 500//305 TODO: Should be 305C
+#define HEATER_0_MAXTEMP 500  //305 TODO: Should be 305C
 #endif
-#define HEATER_1_MAXTEMP 305
-#define HEATER_2_MAXTEMP 305
-#define BED_MAXTEMP 125
-#define AMBIENT_MAXTEMP 100
+#define HEATER_1_MAXTEMP 500  //TODO: Should be 305C
+#define HEATER_2_MAXTEMP 500  //TODO: Should be 305C
+#define BED_MAXTEMP 255       //TODO: Should be 125C
+#define AMBIENT_MAXTEMP 255   //TODO: Should be 100C
 
 #if defined(E3D_PT100_EXTRUDER_WITH_AMP) || defined(E3D_PT100_EXTRUDER_NO_AMP)
 // Define PID constants for extruder with PT100
