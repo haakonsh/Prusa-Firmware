@@ -80,6 +80,7 @@ extern FILE _uartout;
 #define SERIAL_PROTOCOLPGM(x) (serialprintPGM(PSTR(x)))
 #define SERIAL_PROTOCOLRPGM(x) (serialprintPGM((x)))
 #define SERIAL_PROTOCOLLN(x) (MYSERIAL.println(x))
+#define SERIAL_PROTOCOLLNE(x,y) (MYSERIAL.println(x,y))
 #define SERIAL_PROTOCOLLNPGM(x) (serialprintlnPGM(PSTR(x)))
 #define SERIAL_PROTOCOLLNRPGM(x) (serialprintlnPGM((x)))
 

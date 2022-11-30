@@ -2105,14 +2105,24 @@ void adc_callback()
 #endif //IR_SENSOR_ANALOG
     adc_values_ready = true;
 
-    /* Print raw adc_values array*/
-
-    for(uint q = 0; q < (sizeof(adc_values)/2); q++)
-    {
-      SERIAL_PROTOCOL("\n");
-      SERIAL_PROTOCOL("adc_values in decimal:\n");
-      SERIAL_PROTOCOLLN(adc_values[q], DEC);
-    }
+    /* Print raw adc_values array*/                                                                           
+    SERIAL_PROTOCOL("adc_values in decimal:\n");
+    SERIAL_PROTOCOL("Channel 0: ");         
+    SERIAL_PROTOCOLLNE(adc_values[0]/OVERSAMPLENR, DEC);
+    SERIAL_PROTOCOL("Channel 1: ");         
+    SERIAL_PROTOCOLLNE(adc_values[1]/OVERSAMPLENR, DEC);
+    SERIAL_PROTOCOL("Channel 2: ");         
+    SERIAL_PROTOCOLLNE(adc_values[2]/OVERSAMPLENR, DEC);
+    SERIAL_PROTOCOL("Channel 3: ");         
+    SERIAL_PROTOCOLLNE(adc_values[3]/OVERSAMPLENR, DEC);
+    SERIAL_PROTOCOL("Channel 4: ");         
+    SERIAL_PROTOCOLLNE(adc_values[4]/OVERSAMPLENR, DEC);
+    SERIAL_PROTOCOL("Channel 5: ");         
+    SERIAL_PROTOCOLLNE(adc_values[5]/OVERSAMPLENR, DEC);
+    SERIAL_PROTOCOL("Channel 6: ");         
+    SERIAL_PROTOCOLLNE(adc_values[6]/OVERSAMPLENR, DEC);
+    SERIAL_PROTOCOL(" \n");
+    SERIAL_PROTOCOL(" \n");    
 }
 
 static void setCurrentTemperaturesFromIsr()
