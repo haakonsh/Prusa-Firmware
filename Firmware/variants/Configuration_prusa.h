@@ -325,12 +325,12 @@
 #if defined(E3D_PT100_EXTRUDER_WITH_AMP) || defined(E3D_PT100_EXTRUDER_NO_AMP)
 #define HEATER_0_MAXTEMP 410
 #else
-#define HEATER_0_MAXTEMP 500  //305 TODO: Should be 305C
+#define HEATER_0_MAXTEMP 16383  //305 TODO: Should be 305C
 #endif
-#define HEATER_1_MAXTEMP 500  //TODO: Should be 305C
-#define HEATER_2_MAXTEMP 500  //TODO: Should be 305C
-#define BED_MAXTEMP 255       //TODO: Should be 125C
-#define AMBIENT_MAXTEMP 255   //TODO: Should be 100C
+#define HEATER_1_MAXTEMP 16383  //TODO: Should be 305C
+#define HEATER_2_MAXTEMP 16383  //TODO: Should be 305C
+#define BED_MAXTEMP 16383       //TODO: Should be 125C
+#define AMBIENT_MAXTEMP 16383   //TODO: Should be 100C
 
 #if defined(E3D_PT100_EXTRUDER_WITH_AMP) || defined(E3D_PT100_EXTRUDER_NO_AMP)
 // Define PID constants for extruder with PT100
@@ -409,6 +409,10 @@
 
 // Define Prusa filament runout sensor
 //#define FILAMENT_RUNOUT_SUPPORT
+
+#define DIFFERENTIAL_ADC_CHANNEL 0
+//#define PT1000_DIFF_10X_GAIN // PT1000 TRD is used, diff input with a 44Ohm ref load at TEMP1
+#define THERMISTOR_DIFF_10X_GAIN // NT104GT-2 thermistor is used, diff input with a 44Ohm ref load at TEMP1
 
 #ifdef FILAMENT_RUNOUT_SUPPORT
 #define FILAMENT_RUNOUT_SENSOR 1
@@ -616,11 +620,16 @@
 // 148 is E3D Pt100 with 4k7 pullup and no PT100 Amplifier on a MiniRambo 1.3a
 // 247 is Pt100 with 4k7 pullup and PT100 Amplifier
 // 110 is Pt100 with 1k pullup (non standard)
+// 111 is NT104GT-2 with 4k7 pullup, configured as a whetstone bridge with a 640R as a reference across the TEMP1 port
+// 1048 is Pt1000 with 4k7 pullup, configured as a whetstone bridge with a 1500R as a reference across the TEMP1 port
+
 
 #if defined(E3D_PT100_EXTRUDER_WITH_AMP)
 #define TEMP_SENSOR_0 247
 #elif defined(E3D_PT100_EXTRUDER_NO_AMP)
 #define TEMP_SENSOR_0 148
+#elif defined(PT1000_DIFF_10X_GAIN)
+#define TEMP_SENSOR_0 1048
 #else
 #define TEMP_SENSOR_0 5
 #endif

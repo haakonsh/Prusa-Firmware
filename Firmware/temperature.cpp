@@ -1581,7 +1581,7 @@ void check_max_temp_raw()
 #else
     if (current_temperature_raw[0] >= maxttemp_raw[0]) {
 #endif
-        set_temp_error(TempErrorSource::hotend, 0, TempErrorType::max);
+        //set_temp_error(TempErrorSource::hotend, 0, TempErrorType::max); //TODO: Disabled the ambient maxtemp error
     }
     //bed
 #if defined(BED_MAXTEMP) && (TEMP_SENSOR_BED != 0)
@@ -1600,7 +1600,7 @@ void check_max_temp_raw()
 #else
     if (current_temperature_raw_ambient >= ambient_maxttemp_raw) {
 #endif
-        //set_temp_error(TempErrorSource::ambient, 0, TempErrorType::max);/TODO: Disabled the ambient maxtemp error
+        //set_temp_error(TempErrorSource::ambient, 0, TempErrorType::max);//TODO: Disabled the ambient maxtemp error
     }
 #endif
 }
@@ -2104,11 +2104,18 @@ void adc_callback()
     current_voltage_raw_IR = adc_values[ADC_PIN_IDX(VOLT_IR_PIN)];
 #endif //IR_SENSOR_ANALOG
     adc_values_ready = true;
-
+    
     /* Print raw adc_values array*/                                                                           
     SERIAL_PROTOCOL("adc_values in decimal:\n");
-    SERIAL_PROTOCOL("Channel 0: ");         
-    SERIAL_PROTOCOLLNE(adc_values[0]/OVERSAMPLENR, DEC);
+    SERIAL_PROTOCOL("Channel 0: ");
+    /*uint8_t * adc_diff_p = (uint8_t *)&adc_values[0];
+    uint8_t adc_diff[2];
+    adc_diff[0] = *adc_diff_p++;                   //1000001100001100
+    adc_diff[1] = *adc_diff_p; //&/OVERSAMPLENR;   //11011010100
+    SERIAL_PROTOCOL_F(adc_diff[0], BIN);
+    SERIAL_PROTOCOL_F(adc_diff[1], BIN);*/
+    SERIAL_PROTOCOLLNE(adc_values[0], DEC);
+    SERIAL_PROTOCOL(" \n");
     SERIAL_PROTOCOL("Channel 1: ");         
     SERIAL_PROTOCOLLNE(adc_values[1]/OVERSAMPLENR, DEC);
     SERIAL_PROTOCOL("Channel 2: ");         

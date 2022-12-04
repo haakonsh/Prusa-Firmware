@@ -34,14 +34,7 @@ static void adc_reset()
     adc_count = 0;
     adc_channel = 0;
     adc_channel_idx = first_channel_idx;
-    //adc_setmux(adc_channel_idx); 
-    /* 
-    * First channel is T0, so we can highjack adc_reset() to /
-    * setup differential-inputs on the first channel, without/
-    * changing adc_setmux() itself.                          /
-    * PDI: ADC1, NDI: ADC0, Gain: 10x --> MUX5:0 = 0x9       /
-    */
-    ADMUX = (ADMUX & ~(0x1F)) | (0x9 & 0x1F);
+    adc_setmux(adc_channel_idx);    
 
     memset((void*)adc_values, 0, sizeof(adc_values));
 }
@@ -49,9 +42,13 @@ static void adc_reset()
 static void adc_setmux(uint8_t ch)
 {
 	ch &= 0x0f;
-	if (ch & 0x08) ADCSRB |= (1 << MUX5);
+    if (ch & 0x08) ADCSRB |= (1 << MUX5);
 	else ADCSRB &= ~(1 << MUX5);
-	ADMUX = (ADMUX & ~(0x07)) | (ch & 0x07);
+    /* 
+    * setup differential-inputs on the first channel    /
+    * PDI: ADC1, NDI: ADC0, Gain: 10x --> MUX5:0 = 0x9 */
+    if(ch == DIFFERENTIAL_ADC_CHANNEL_IDX)ADMUX = (ADMUX & ~(0x1F)) | (0x9 & 0x1F);
+    else ADMUX = (ADMUX & ~(0x1F)) | (ch & 0x07);
 }
 
 void adc_start_cycle() {
@@ -65,7 +62,19 @@ extern void ADC_CALLBACK();
 
 ISR(ADC_vect)
 {
-    adc_values[adc_channel] += ADC;
+    static int adc_val_diff_acc acc = 0;
+    if(adc_channel == DIFFERENTIAL_ADC_CHANNEL_IDX)
+    {        
+        adc_values[adc_channel] = ADC; // Read the differential channels
+        if (adc_values[adc_channel] & 0x200)  // Check the sign bit (10th)
+        {
+            adc_values[adc_channel] |= 0xFC00; // Pad 1's (two's complement)
+        }
+        adc_values[adc_channel] = adc_val_diff_acc/ADC_OVRSAMPL;
+    }
+    else{
+        adc_values[adc_channel] += ADC;
+    }    
     if (++adc_count == ADC_OVRSAMPL)
     {
         // go to the next channel
