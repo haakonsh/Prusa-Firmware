@@ -635,6 +635,30 @@ static float analog2temp(int raw, uint8_t e) {
     SERIAL_PROTOCOL(" \n");
     return tempc;
   #endif
+  #ifdef HEATER_0_USES_PT1000_DIFF_10X_GAIN
+    volatile float prt = DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTORS / \
+    ( (1.0/((((float)raw / OVERSAMPLENR) / DIFFERENTIAL_ADC_RANGE)\
+     + DIFFERENTIAL_ADC_REFERENCE_RESISTOR_RATIO)) - 1);
+    SERIAL_PROTOCOL("PRT [Ohm]: ");
+    SERIAL_PROTOCOL_F(prt, 7);
+    SERIAL_PROTOCOL(" \n");
+    // SERIAL_PROTOCOL("\n__SIZEOF_DOUBLE__ : ");
+    // SERIAL_PROTOCOL(__SIZEOF_DOUBLE__);
+    // SERIAL_PROTOCOL("\n__SIZEOF_LONG_DOUBLE__  : ");
+    // SERIAL_PROTOCOL(__SIZEOF_LONG_DOUBLE__);
+    // SERIAL_PROTOCOL(" \n");
+    // SERIAL_PROTOCOL(" \n");
+
+    // Solve for the positive root by "completing the square"
+
+    volatile float tempc = -U_ + sqrtf(UU_ - (1 - (prt/PT1000_R0))/B_);
+
+    SERIAL_PROTOCOL("\nTemperature [C]: ");
+    SERIAL_PROTOCOL_F(tempc, 3);
+    SERIAL_PROTOCOL(" \n");
+    SERIAL_PROTOCOL(" \n");
+    return tempc;
+  #endif
 
   if(heater_ttbl_map[e] != NULL)
   {

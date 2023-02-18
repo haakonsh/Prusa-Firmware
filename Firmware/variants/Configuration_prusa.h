@@ -410,10 +410,9 @@
 // Define Prusa filament runout sensor
 //#define FILAMENT_RUNOUT_SUPPORT
 
-//#define HEATER_0_USES_PT1000_DIFF_10X_GAIN // PT1000 TRD is used, diff input with a 44Ohm ref load at TEMP1
-#define HEATER_0_USES_THERMISTOR_DIFF_10X_GAIN // NT104GT-2 thermistor is used, diff input with a 44Ohm ref load at TEMP1
+//#define HEATER_0_USES_THERMISTOR_DIFF_10X_GAIN // NT104GT-2 thermistor is used, diff input with a 44Ohm ref load at TEMP1
+#ifdef HEATER_0_USES_THERMISTOR_DIFF_10X_GAIN // NT104GT-2 thermistor is used, diff input with a 44Ohm ref load at TEMP1
 
-#ifdef HEATER_0_USES_THERMISTOR_DIFF_10X_GAIN //error: macro names must be identifiers
 #define DIFFERENTIAL_ADC_CHANNEL_IDX 0
 #define DIFFERENTIAL_ADC_GAIN_FACTOR 10   // 10x gain
 #define DIFFERENTIAL_ADC_RANGE (DIFFERENTIAL_ADC_GAIN_FACTOR*511) // Gain * ( 2^(10-1) - 1) Sign bit offsets range by 511
@@ -430,8 +429,32 @@
    accurate data of your thermistor R/T characteristics.                              */
 // #define A_ 0.0007980877654663700000
 // #define B_ 0.0002132200991990680000
+
 // #define C_ 0.0000000662784840710222
 #endif //   HEATER_0_USES_THERMISTOR_DIFF_10X_GAIN
+
+
+#define HEATER_0_USES_PT1000_DIFF_10X_GAIN // PT1000 TRD is used, diff input with a 44Ohm ref load at TEMP1
+#ifdef HEATER_0_USES_PT1000_DIFF_10X_GAIN // PT1000 TRD is used, diff input with a 44Ohm ref load at TEMP1
+
+#define DIFFERENTIAL_ADC_CHANNEL_IDX 0
+#define DIFFERENTIAL_ADC_GAIN_FACTOR 10   // 10x gain
+#define DIFFERENTIAL_ADC_RANGE (DIFFERENTIAL_ADC_GAIN_FACTOR*511) // Gain * ( 2^(10-1) - 1) Sign bit offsets range by 511
+#define DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTORS 4684.0 // Ohm  TODO: Calibrate value
+#define DIFFERENTIAL_ADC_REFERENCE_RESISTOR 1473.0 // Ohm   TODO: Calibrate value
+#define DIFFERENTIAL_ADC_REFERENCE_RESISTOR_RATIO (DIFFERENTIAL_ADC_REFERENCE_RESISTOR/(DIFFERENTIAL_ADC_REFERENCE_RESISTOR + DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTORS))
+#define PT1000_R0 996.4 // Ohm at 0'C
+// Callendar-Van Dusen equation coefficients. Note: These coefficients are calculated for one unique PRT!
+// PRT(t) = PRT(0) * (1 + A*t + B*t^2) --> t = -U_ + SQRT(U^2 - (1 - PRT(0)/PRT(t))/B_)
+#define A_ 0.00366121510287417
+#define B_ 0.000000978963092132632
+#define U_ (0.5 * (A_ / B_))
+#define UU_ (U_ * U_)
+#define W_ (U_ * PT1000_R0)
+
+
+#endif //   HEATER_0_USES_PT1000_DIFF_10X_GAIN
+
 
 #ifdef FILAMENT_RUNOUT_SUPPORT
 #define FILAMENT_RUNOUT_SENSOR 1
