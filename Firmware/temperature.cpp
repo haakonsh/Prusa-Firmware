@@ -610,6 +610,32 @@ static float analog2temp(int raw, uint8_t e) {
     }
   #endif
 
+  #ifdef HEATER_0_USES_THERMISTOR_DIFF_10X_GAIN
+    volatile float rth = DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTORS / \
+    ( (1.0/((((float)raw / OVERSAMPLENR) / DIFFERENTIAL_ADC_RANGE)\
+     + DIFFERENTIAL_ADC_REFERENCE_RESISTOR_RATIO)) - 1);
+    // SERIAL_PROTOCOL("Rth [Ohm]: ");
+    // SERIAL_PROTOCOL_F(rth, 7);
+    // SERIAL_PROTOCOL(" \n");
+    SERIAL_PROTOCOL("\n__SIZEOF_DOUBLE__ : ");
+    SERIAL_PROTOCOL(__SIZEOF_DOUBLE__);
+    SERIAL_PROTOCOL("\n__SIZEOF_LONG_DOUBLE__  : ");
+    SERIAL_PROTOCOL(__SIZEOF_LONG_DOUBLE__);
+    SERIAL_PROTOCOL(" \n");
+    SERIAL_PROTOCOL(" \n");
+
+
+
+    volatile float log_rth = log(rth);  
+    volatile float tempc = (1.0/(A_ + B_*log_rth + C_*log_rth*log_rth*log_rth)) - 273.15;
+
+    SERIAL_PROTOCOL("Temperature [C]: ");
+    SERIAL_PROTOCOL_F(tempc, 3);
+    SERIAL_PROTOCOL(" \n");
+    SERIAL_PROTOCOL(" \n");
+    return tempc;
+  #endif
+
   if(heater_ttbl_map[e] != NULL)
   {
     float celsius = 0;
@@ -2103,19 +2129,12 @@ void adc_callback()
 #ifdef IR_SENSOR_ANALOG
     current_voltage_raw_IR = adc_values[ADC_PIN_IDX(VOLT_IR_PIN)];
 #endif //IR_SENSOR_ANALOG
-    adc_values_ready = true;
+    adc_values_ready = true; 
     
     /* Print raw adc_values array*/                                                                           
     SERIAL_PROTOCOL("adc_values in decimal:\n");
     SERIAL_PROTOCOL("Channel 0: ");
-    /*uint8_t * adc_diff_p = (uint8_t *)&adc_values[0];
-    uint8_t adc_diff[2];
-    adc_diff[0] = *adc_diff_p++;                   //1000001100001100
-    adc_diff[1] = *adc_diff_p; //&/OVERSAMPLENR;   //11011010100
-    SERIAL_PROTOCOL_F(adc_diff[0], BIN);
-    SERIAL_PROTOCOL_F(adc_diff[1], BIN);*/
-    SERIAL_PROTOCOLLNE(adc_values[0], DEC);
-    SERIAL_PROTOCOL(" \n");
+    SERIAL_PROTOCOLLNE(adc_values[0]/OVERSAMPLENR, DEC);
     SERIAL_PROTOCOL("Channel 1: ");         
     SERIAL_PROTOCOLLNE(adc_values[1]/OVERSAMPLENR, DEC);
     SERIAL_PROTOCOL("Channel 2: ");         

@@ -44,8 +44,8 @@ static void adc_setmux(uint8_t ch)
 	ch &= 0x0f;
     if (ch & 0x08) ADCSRB |= (1 << MUX5);
 	else ADCSRB &= ~(1 << MUX5);
-    /* 
-    * setup differential-inputs on the first channel    /
+    
+    /*setup differential inputs on the first channel    /
     * PDI: ADC1, NDI: ADC0, Gain: 10x --> MUX5:0 = 0x9 */
     if(ch == DIFFERENTIAL_ADC_CHANNEL_IDX)ADMUX = (ADMUX & ~(0x1F)) | (0x9 & 0x1F);
     else ADMUX = (ADMUX & ~(0x1F)) | (ch & 0x07);
@@ -62,15 +62,16 @@ extern void ADC_CALLBACK();
 
 ISR(ADC_vect)
 {
-    static int adc_val_diff_acc acc = 0;
     if(adc_channel == DIFFERENTIAL_ADC_CHANNEL_IDX)
     {        
-        adc_values[adc_channel] = ADC; // Read the differential channels
-        if (adc_values[adc_channel] & 0x200)  // Check the sign bit (10th)
+        if (ADC & 0x200)  // Check the sign bit (10th)
         {
-            adc_values[adc_channel] |= 0xFC00; // Pad 1's (two's complement)
+            adc_values[DIFFERENTIAL_ADC_CHANNEL_IDX] += ADC | 0xFC00; // Pad 1's (two's complement)
         }
-        adc_values[adc_channel] = adc_val_diff_acc/ADC_OVRSAMPL;
+        else
+        {
+            adc_values[DIFFERENTIAL_ADC_CHANNEL_IDX] += ADC;
+        }
     }
     else{
         adc_values[adc_channel] += ADC;

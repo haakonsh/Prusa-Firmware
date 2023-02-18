@@ -1483,12 +1483,12 @@ failures 0
 #Check if exactly the same hexfile already exists
     if [[ -f "$SCRIPT_PATH/../$OUTPUT_FOLDER/$OUTPUT_FILENAME.hex"  &&  "$LANGUAGES" == "ALL" ]]; then
         echo "Flashing firmware"
-        $SCRIPT_PATH_W/avrdude-6.4-mingw32/avrdude.exe -v -p atmega2560 -c wiring -P COM3 -b 115200 -D -U flash:w:$SCRIPT_PATH_W/../$OUTPUT_FOLDER/$OUTPUT_FILENAME.hex:i
+        $SCRIPT_PATH_W/avrdude-6.4-mingw32/avrdude.exe -v -p atmega2560 -c wiring -P COM4 -b 115200 -D -U flash:w:$SCRIPT_PATH_W/../$OUTPUT_FOLDER/$OUTPUT_FILENAME.hex:i
         echo "Firmware flashed and verified!"
     
     elif [[ -f "$SCRIPT_PATH/../$OUTPUT_FOLDER/$OUTPUT_FILENAME-EN_FARM.hex"  &&  "$LANGUAGES" == "EN_FARM" ]]; then
         echo "Flashing firmware"        
-        $SCRIPT_PATH_W/avrdude-6.4-mingw32/avrdude.exe -v -p atmega2560 -c wiring -P COM3 -b 115200 -D -U flash:w:$SCRIPT_PATH_W/../$OUTPUT_FOLDER/$OUTPUT_FILENAME-$LANGUAGES.hex:i
+        $SCRIPT_PATH_W/avrdude-6.4-mingw32/avrdude.exe -v -p atmega2560 -c wiring -P COM4 -b 115200 -D -U flash:w:$SCRIPT_PATH_W/../$OUTPUT_FOLDER/$OUTPUT_FILENAME-$LANGUAGES.hex:i
         echo "Firmware flashed and verified!"
     fi
 }

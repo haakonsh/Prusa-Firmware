@@ -410,9 +410,28 @@
 // Define Prusa filament runout sensor
 //#define FILAMENT_RUNOUT_SUPPORT
 
-#define DIFFERENTIAL_ADC_CHANNEL 0
-//#define PT1000_DIFF_10X_GAIN // PT1000 TRD is used, diff input with a 44Ohm ref load at TEMP1
-#define THERMISTOR_DIFF_10X_GAIN // NT104GT-2 thermistor is used, diff input with a 44Ohm ref load at TEMP1
+//#define HEATER_0_USES_PT1000_DIFF_10X_GAIN // PT1000 TRD is used, diff input with a 44Ohm ref load at TEMP1
+#define HEATER_0_USES_THERMISTOR_DIFF_10X_GAIN // NT104GT-2 thermistor is used, diff input with a 44Ohm ref load at TEMP1
+
+#ifdef HEATER_0_USES_THERMISTOR_DIFF_10X_GAIN //error: macro names must be identifiers
+#define DIFFERENTIAL_ADC_CHANNEL_IDX 0
+#define DIFFERENTIAL_ADC_GAIN_FACTOR 10   // 10x gain
+#define DIFFERENTIAL_ADC_RANGE (DIFFERENTIAL_ADC_GAIN_FACTOR*511) // Gain * ( 2^(10-1) - 1) Sign bit offsets range by 511
+#define DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTORS 4700.0 // Ohm  TODO: Calibrate value
+//#define DIFFERENTIAL_ADC_REFERENCE_RESISTOR 640.0 // Ohm   TODO: Calibrate value
+#define DIFFERENTIAL_ADC_REFERENCE_RESISTOR 103000.0 // Ohm   TODO: Calibrate value
+#define DIFFERENTIAL_ADC_REFERENCE_RESISTOR_RATIO (DIFFERENTIAL_ADC_REFERENCE_RESISTOR/(DIFFERENTIAL_ADC_REFERENCE_RESISTOR + DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTORS))
+// Steinhart-Hart equation coefficients. Note: These coefficients are calculated for one unique thermistor!
+#define A_ 0.0007324574939808130000
+#define B_ 0.0002225367713550080000
+#define C_ 0.0000000444219939579289
+/* Steinhart-Hart equation coefficients. Note: These coefficients are calculated from  /
+   Semitec's 104NT-4-R025H42G datasheet, and can be used if you are not able to get    /
+   accurate data of your thermistor R/T characteristics.                              */
+// #define A_ 0.0007980877654663700000
+// #define B_ 0.0002132200991990680000
+// #define C_ 0.0000000662784840710222
+#endif //   HEATER_0_USES_THERMISTOR_DIFF_10X_GAIN
 
 #ifdef FILAMENT_RUNOUT_SUPPORT
 #define FILAMENT_RUNOUT_SENSOR 1
@@ -628,8 +647,6 @@
 #define TEMP_SENSOR_0 247
 #elif defined(E3D_PT100_EXTRUDER_NO_AMP)
 #define TEMP_SENSOR_0 148
-#elif defined(PT1000_DIFF_10X_GAIN)
-#define TEMP_SENSOR_0 1048
 #else
 #define TEMP_SENSOR_0 5
 #endif
