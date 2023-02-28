@@ -60,7 +60,7 @@
 #endif //SYSTEM_TIMER_2
 
 // temperature manager timer configuration
-#define TEMP_MGR_INTV   0.27 // seconds, ~3.7Hz
+#define TEMP_MGR_INTV   0.27 // seconds, ~3.7Hz //TODO: uncomment
 #define TEMP_TIM_PRESCALE 256
 #define TEMP_TIM_OCRA_OVF (uint16_t)(TEMP_MGR_INTV / ((long double)TEMP_TIM_PRESCALE / F_CPU))
 #define TEMP_TIM_REGNAME(registerbase,number,suffix) _REGNAME(registerbase,number,suffix)
@@ -127,7 +127,7 @@ int current_voltage_raw_bed = 0;
 uint16_t current_voltage_raw_IR = 0;
 #endif //IR_SENSOR_ANALOG
 
-int current_temperature_bed_raw = 0;
+int16_t current_temperature_bed_raw = 0;
 float current_temperature_bed = 0.0;
   
 
@@ -639,24 +639,13 @@ static float analog2temp(int raw, uint8_t e) {
     volatile float prt = DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTORS / \
     ( (1.0/((((float)raw / OVERSAMPLENR) / DIFFERENTIAL_ADC_RANGE)\
      + DIFFERENTIAL_ADC_REFERENCE_RESISTOR_RATIO)) - 1);
-    SERIAL_PROTOCOL("PRT [Ohm]: ");
-    SERIAL_PROTOCOL_F(prt, 7);
-    SERIAL_PROTOCOL(" \n");
-    // SERIAL_PROTOCOL("\n__SIZEOF_DOUBLE__ : ");
-    // SERIAL_PROTOCOL(__SIZEOF_DOUBLE__);
-    // SERIAL_PROTOCOL("\n__SIZEOF_LONG_DOUBLE__  : ");
-    // SERIAL_PROTOCOL(__SIZEOF_LONG_DOUBLE__);
-    // SERIAL_PROTOCOL(" \n");
-    // SERIAL_PROTOCOL(" \n");
-
     // Solve for the positive root by "completing the square"
-
     volatile float tempc = -U_ + sqrtf(UU_ - (1 - (prt/PT1000_R0))/B_);
 
-    SERIAL_PROTOCOL("\nTemperature [C]: ");
-    SERIAL_PROTOCOL_F(tempc, 3);
-    SERIAL_PROTOCOL(" \n");
-    SERIAL_PROTOCOL(" \n");
+    SERIAL_PROTOCOL("PRT [Ohm]: ");
+    SERIAL_PROTOCOLLNE(prt, 1);
+    SERIAL_PROTOCOL("Temperature [C]: ");
+    SERIAL_PROTOCOLLNE(tempc, 1);
     return tempc;
   #endif
 
@@ -2136,43 +2125,50 @@ float current_temperature_ambient_isr;
 // ISR callback from adc when sampling finished
 void adc_callback()
 {
-    current_temperature_raw[0] = adc_values[ADC_PIN_IDX(TEMP_0_PIN)]; //heater
-    current_temperature_bed_raw = adc_values[ADC_PIN_IDX(TEMP_BED_PIN)];
+    current_temperature_raw[0] = adc_values[TEMP_0_IDX]; //heater
+    current_temperature_bed_raw = adc_values[TEMP_BED_IDX];
 #ifdef PINDA_THERMISTOR
-    current_temperature_raw_pinda = adc_values[ADC_PIN_IDX(TEMP_PINDA_PIN)];
+    current_temperature_raw_pinda = adc_values[TEMP_PINDA_IDX];
 #endif //PINDA_THERMISTOR
 #ifdef AMBIENT_THERMISTOR
-    current_temperature_raw_ambient = adc_values[ADC_PIN_IDX(TEMP_AMBIENT_PIN)]; // 5->6
+    current_temperature_raw_ambient = adc_values[TEMP_AMBIENT_IDX]; // 5->6
 #endif //AMBIENT_THERMISTOR
 #ifdef VOLT_PWR_PIN
-    current_voltage_raw_pwr = adc_values[ADC_PIN_IDX(VOLT_PWR_PIN)];
+    current_voltage_raw_pwr = adc_values[VOLT_PWR_IDX];
 #endif
 #ifdef VOLT_BED_PIN
-    current_voltage_raw_bed = adc_values[ADC_PIN_IDX(VOLT_BED_PIN)]; // 6->9
+    current_voltage_raw_bed = adc_values[VOLT_BED_IDX]; // 6->9
 #endif
 #ifdef IR_SENSOR_ANALOG
-    current_voltage_raw_IR = adc_values[ADC_PIN_IDX(VOLT_IR_PIN)];
+    current_voltage_raw_IR = adc_values[VOLT_IR_IDX];
 #endif //IR_SENSOR_ANALOG
     adc_values_ready = true; 
-    
-    /* Print raw adc_values array*/                                                                           
-    SERIAL_PROTOCOL("adc_values in decimal:\n");
-    SERIAL_PROTOCOL("Channel 0: ");
-    SERIAL_PROTOCOLLNE(adc_values[0]/OVERSAMPLENR, DEC);
-    SERIAL_PROTOCOL("Channel 1: ");         
-    SERIAL_PROTOCOLLNE(adc_values[1]/OVERSAMPLENR, DEC);
-    SERIAL_PROTOCOL("Channel 2: ");         
-    SERIAL_PROTOCOLLNE(adc_values[2]/OVERSAMPLENR, DEC);
-    SERIAL_PROTOCOL("Channel 3: ");         
-    SERIAL_PROTOCOLLNE(adc_values[3]/OVERSAMPLENR, DEC);
-    SERIAL_PROTOCOL("Channel 4: ");         
-    SERIAL_PROTOCOLLNE(adc_values[4]/OVERSAMPLENR, DEC);
-    SERIAL_PROTOCOL("Channel 5: ");         
-    SERIAL_PROTOCOLLNE(adc_values[5]/OVERSAMPLENR, DEC);
-    SERIAL_PROTOCOL("Channel 6: ");         
-    SERIAL_PROTOCOLLNE(adc_values[6]/OVERSAMPLENR, DEC);
-    SERIAL_PROTOCOL(" \n");
-    SERIAL_PROTOCOL(" \n");    
+
+    SERIAL_PROTOCOL("temperature_raw:       ");
+    SERIAL_PROTOCOLLNE(current_temperature_raw[0]/OVERSAMPLENR, DEC);
+    SERIAL_PROTOCOL("temperature_bed_raw:     ");
+    SERIAL_PROTOCOLLNE(current_temperature_bed_raw/OVERSAMPLENR, DEC);
+#ifdef PINDA_THERMISTOR
+    SERIAL_PROTOCOL("temperature_raw_pinda:   ");
+    SERIAL_PROTOCOLLNE(current_temperature_raw_pinda/OVERSAMPLENR, DEC);
+#endif //PINDA_THERMISTOR
+#ifdef AMBIENT_THERMISTOR
+    SERIAL_PROTOCOL("temperature_raw_ambient: ");
+    SERIAL_PROTOCOLLNE(current_temperature_raw_ambient/OVERSAMPLENR, DEC);
+#endif //AMBIENT_THERMISTOR
+#ifdef VOLT_PWR_PIN
+    SERIAL_PROTOCOL("voltage_raw_pwr:         ");
+    SERIAL_PROTOCOLLNE(current_voltage_raw_pwr/OVERSAMPLENR, DEC);
+#endif
+#ifdef VOLT_BED_PIN
+    SERIAL_PROTOCOL("voltage_raw_bed:         ");
+    SERIAL_PROTOCOLLNE(current_voltage_raw_bed/OVERSAMPLENR, DEC);
+#endif
+#ifdef IR_SENSOR_ANALOG
+    SERIAL_PROTOCOL("voltage_raw_IR:          ");
+    SERIAL_PROTOCOLLNE(current_voltage_raw_IR/OVERSAMPLENR, DEC);
+#endif //IR_SENSOR_ANALOG                                                              
+    adc_values_ready = true;
 }
 
 static void setCurrentTemperaturesFromIsr()

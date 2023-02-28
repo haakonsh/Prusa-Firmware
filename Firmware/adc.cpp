@@ -8,17 +8,17 @@
 
 static uint8_t adc_count; //used for oversampling
 static uint8_t adc_channel_idx; //bitmask index
-volatile uint8_t adc_channel; //regular index
 volatile int16_t adc_values[ADC_CHAN_CNT];  // Changed from uint to int for differential inputs
 
 static void adc_reset();
-static void adc_setmux(uint8_t ch);
+static bool adc_setmux(uint8_t ch);
+// volatile uint8_t chn = 0;
 
 void adc_init()
 {
 	puts_P(PSTR("adc_init"));
-    DIDR0 = ((ADC_CHAN_MSK & ADC_DIDR_MSK) & 0xff); //disable digital inputs PORTF
-    DIDR2 = ((ADC_CHAN_MSK & ADC_DIDR_MSK) >> 8); //disable digital inputs PORTK
+    DIDR0 = (ADC_DIDR_MSK & 0xff); //disable digital inputs PORTF
+    DIDR2 = (ADC_DIDR_MSK >> 8); //disable digital inputs PORTK
     ADMUX |= (1 << REFS0); //use AVCC as reference
 
     //enable ADC, set prescaler/128, enable interrupt
@@ -26,29 +26,143 @@ void adc_init()
 }
 
 static void adc_reset()
-{
-    static const uint8_t first_channel_idx = 0;
-    static_assert((1 << first_channel_idx) & ADC_CHAN_MSK);
-
+{  
     ADCSRA &= ~(1 << ADSC); //stop conversion just in case
     adc_count = 0;
-    adc_channel = 0;
-    adc_channel_idx = first_channel_idx;
-    adc_setmux(adc_channel_idx);    
-
+    adc_channel_idx = 0;
+    while(adc_channel_idx < ADC_CHAN_CNT) // Finds first channel
+    {
+        if(adc_setmux(adc_channel_idx))
+        {
+            break;
+        }
+        else
+        {
+            adc_channel_idx++;
+        }            
+    }
+    SERIAL_PROTOCOL("First channel index: ");
+    SERIAL_PROTOCOLLNE(adc_channel_idx, DEC);
     memset((void*)adc_values, 0, sizeof(adc_values));
 }
 
-static void adc_setmux(uint8_t ch)
+static bool adc_setmux(uint8_t ch_idx)
 {
-	ch &= 0x0f;
-    if (ch & 0x08) ADCSRB |= (1 << MUX5);
-	else ADCSRB &= ~(1 << MUX5);
-    
-    /*setup differential inputs on the first channel    /
-    * PDI: ADC1, NDI: ADC0, Gain: 10x --> MUX5:0 = 0x9 */
-    if(ch == DIFFERENTIAL_ADC_CHANNEL_IDX)ADMUX = (ADMUX & ~(0x1F)) | (0x9 & 0x1F);
-    else ADMUX = (ADMUX & ~(0x1F)) | (ch & 0x07);
+	ADCSRB &= ~(1 << MUX5);
+    ADMUX &= ~(0x1F);
+
+    switch (ch_idx)
+    {
+        #if defined TEMP_0_CHN
+            case TEMP_0_IDX:
+                #if (TEMP_0_CHN & (1 << 5)) 
+                    ADCSRB |= (1 << MUX5);
+                #endif
+                    ADMUX |= TEMP_0_CHN & 0x1F;                    
+                    // SERIAL_PROTOCOL("TEMP_0_CHN: ");
+                    // SERIAL_PROTOCOLLNE(TEMP_0_CHN, DEC);
+                return true;
+        #endif  // TEMP_0_CHN
+
+        #if defined TEMP_1_CHN
+            case TEMP_1_IDX:
+                #if (TEMP_1_CHN & (1 << 5)) 
+                    ADCSRB |= (1 << MUX5);
+                #endif
+                    ADMUX |= TEMP_1_CHN & 0x1F;
+                    // SERIAL_PROTOCOL("TEMP_1_CHN: ");
+                    // SERIAL_PROTOCOLLNE(TEMP_1_CHN, DEC);
+                return true;
+        #endif  // TEMP_1_CHN
+
+        #if defined TEMP_2_CHN
+            case TEMP_2_IDX:
+                #if (TEMP_2_CHN & (1 << 5)) 
+                    ADCSRB |= (1 << MUX5);
+                #endif
+                    ADMUX |= TEMP_2_CHN & 0x1F;
+                    // SERIAL_PROTOCOL("ADMUX: ");
+                    // SERIAL_PROTOCOL_F((ADMUX & 0x1F), DEC);
+                    // SERIAL_PROTOCOL("   TEMP_2_CHN: ");
+                    // SERIAL_PROTOCOLLNE(TEMP_2_CHN, DEC);
+                return true;
+        #endif  // TEMP_2_CHN
+
+        #if defined TEMP_BED_CHN
+            case TEMP_BED_IDX:
+                #if (TEMP_BED_CHN & (1 << 5)) 
+                    ADCSRB |= (1 << MUX5);
+                #endif
+                ADMUX |= TEMP_BED_CHN & 0x1F;
+                // SERIAL_PROTOCOL("ADCSRB: ");
+                // SERIAL_PROTOCOL_F(((ADCSRB & (1 << MUX5))), DEC);
+                // SERIAL_PROTOCOL("   ADMUX: ");
+                // SERIAL_PROTOCOL_F((ADMUX & 0x1F), DEC);
+                // SERIAL_PROTOCOL("   TEMP_BED_CHN: ");
+                // SERIAL_PROTOCOLLNE(TEMP_BED_CHN, DEC);
+                return true;
+        #endif  // TEMP_BED_CHN
+        
+        #if defined TEMP_AMBIENT_CHN
+            case TEMP_AMBIENT_IDX:
+                #if (TEMP_AMBIENT_CHN & (1 << 5)) 
+                    ADCSRB |= (1 << MUX5);
+                #endif
+                    ADMUX = (ADMUX & ~(0x1F)) | (TEMP_AMBIENT_CHN & 0x1F);
+                    // SERIAL_PROTOCOL("TEMP_AMBIENT_CHN: ");
+                    // SERIAL_PROTOCOLLNE(TEMP_AMBIENT_CHN, DEC);
+                return true;
+        #endif  // TEMP_AMBIENT_CHN
+
+        #if defined TEMP_PINDA_CHN
+            case TEMP_PINDA_IDX:
+                #if (TEMP_PINDA_CHN & (1 << 5)) 
+                    ADCSRB |= (1 << MUX5);
+                #endif
+                    ADMUX = (ADMUX & ~(0x1F)) | (TEMP_PINDA_CHN & 0x1F);
+                    // SERIAL_PROTOCOL("TEMP_PINDA_CHN: ");
+                    // SERIAL_PROTOCOLLNE(TEMP_PINDA_CHN, DEC);
+                return true;
+        #endif  // TEMP_PINDA_CHN
+
+        #if defined VOLT_PWR_CHN
+            case VOLT_PWR_IDX:
+                #if (VOLT_PWR_CHN & (1 << 5)) 
+                    ADCSRB |= (1 << MUX5);
+                #endif
+                    ADMUX = (ADMUX & ~(0x1F)) | (VOLT_PWR_CHN & 0x1F);
+                    // SERIAL_PROTOCOL("VOLT_PWR_CHN: ");
+                    // SERIAL_PROTOCOLLNE(VOLT_PWR_CHN, DEC);
+                return true;
+        #endif  // VOLT_PWR_CHN
+
+        #if defined VOLT_BED_CHN
+            case VOLT_BED_IDX:
+                #if (VOLT_BED_CHN & (1 << 5)) 
+                    ADCSRB |= (1 << MUX5);
+                #endif
+                    ADMUX = (ADMUX & ~(0x1F)) | (VOLT_BED_CHN & 0x1F);
+                    // SERIAL_PROTOCOL("VOLT_BED_CHN: ");
+                    // SERIAL_PROTOCOLLNE(VOLT_BED_CHN, DEC);
+                return true;
+        #endif  // VOLT_BED_CHN
+
+        #if defined VOLT_IR_CHN
+            case VOLT_IR_IDX:
+                #if (VOLT_IR_CHN & (1 << 5)) 
+                    ADCSRB |= (1 << MUX5);
+                #endif
+                    ADMUX = (ADMUX & ~(0x1F)) | (VOLT_IR_CHN & 0x1F);
+                    // SERIAL_PROTOCOL("VOLT_IR_CHN: ");
+                    // SERIAL_PROTOCOLLNE(VOLT_IR_CHN, DEC);
+                return true;            
+        #endif  // VOLT_IR_CHN
+
+        default:
+            SERIAL_PROTOCOL("Channel index not in use: ");
+            SERIAL_PROTOCOLLNE(ch_idx, DEC);
+            return false;        
+    }
 }
 
 void adc_start_cycle() {
@@ -62,37 +176,110 @@ extern void ADC_CALLBACK();
 
 ISR(ADC_vect)
 {
-    if(adc_channel == DIFFERENTIAL_ADC_CHANNEL_IDX)
+    if(ADC & 0x200)    // Check the sign bit (10th)
     {        
-        if (ADC & 0x200)  // Check the sign bit (10th)
-        {
-            adc_values[DIFFERENTIAL_ADC_CHANNEL_IDX] += ADC | 0xFC00; // Pad 1's (two's complement)
-        }
-        else
-        {
-            adc_values[DIFFERENTIAL_ADC_CHANNEL_IDX] += ADC;
-        }
+        adc_values[adc_channel_idx] += ADC | 0xFC00; // Pad 1's (two's complement)
     }
-    else{
-        adc_values[adc_channel] += ADC;
-    }    
-    if (++adc_count == ADC_OVRSAMPL)
+    else
     {
-        // go to the next channel
-        if (++adc_channel == ADC_CHAN_CNT) {
-#ifdef ADC_CALLBACK
-            ADC_CALLBACK();
-#endif
-            return; // do not start the next measurement since there are no channels remaining
-        }
-
+        adc_values[adc_channel_idx] += ADC;
+    }
+      
+    if (++adc_count == ADC_OVRSAMPL) 
+    {
         // find the next channel
-        while (++adc_channel_idx) {
-            if (ADC_CHAN_MSK & (1 << adc_channel_idx)) {
-                adc_setmux(adc_channel_idx);
-                adc_count = 0;
-                break;
+        while (++adc_channel_idx) {            
+            if (adc_channel_idx == ADC_CHAN_CNT) {
+#ifdef ADC_CALLBACK
+                ADC_CALLBACK();
+#endif
+                return; // do not start the next measurement since there are no channels remaining
             }
+            // go to the next channel
+            if (adc_setmux(adc_channel_idx)) {
+                adc_count = 0;
+                // chn = (ADMUX & 0x1F);
+                // if(ADCSRB & (1 << MUX5))
+                // {
+                //     chn |= (1 << 5);
+                // }
+                // switch(chn)
+                // {
+                //     #if defined TEMP_0_CHN
+                //         case TEMP_0_CHN:
+                //             SERIAL_PROTOCOLLN("ADC channel: TEMP_0_CHN");
+                //             SERIAL_PROTOCOL("Channel: ");
+                //             SERIAL_PROTOCOL_F(chn, DEC);
+                //             SERIAL_PROTOCOL("   adc_channel_idx: ");
+                //             SERIAL_PROTOCOLLNE(adc_channel_idx, DEC);
+                //             break;            
+                //     #endif  // TEMP_0_CHN
+                //     #if defined TEMP_BED_CHN
+                //         case TEMP_BED_CHN:
+                //             SERIAL_PROTOCOLLN("ADC channel: TEMP_BED_CHN");
+                //             SERIAL_PROTOCOL("Channel: ");
+                //             SERIAL_PROTOCOL_F(chn, DEC);
+                //             SERIAL_PROTOCOL("   adc_channel_idx: ");
+                //             SERIAL_PROTOCOLLNE(adc_channel_idx, DEC);
+                //             break;
+                //     #endif  // TEMP_BED_CHN
+                //     #if defined TEMP_PINDA_CHN
+                //         case TEMP_PINDA_CHN:
+                //             SERIAL_PROTOCOLLN("ADC channel: TEMP_PINDA_CHN");
+                //             SERIAL_PROTOCOL("Channel: ");
+                //             SERIAL_PROTOCOL_F(chn, DEC);
+                //             SERIAL_PROTOCOL("   adc_channel_idx: ");
+                //             SERIAL_PROTOCOLLNE(adc_channel_idx, DEC);
+                //             break;
+                //     #endif  // TEMP_PINDA_CHN
+                //     #if defined VOLT_PWR_CHN
+                //         case VOLT_PWR_CHN:
+                //             SERIAL_PROTOCOLLN("ADC channel: VOLT_PWR_CHN");
+                //             SERIAL_PROTOCOL("Channel: ");
+                //             SERIAL_PROTOCOL_F(chn, DEC);
+                //             SERIAL_PROTOCOL("   adc_channel_idx: ");
+                //             SERIAL_PROTOCOLLNE(adc_channel_idx, DEC);
+
+                //             break;
+                //     #endif  // VOLT_PWR_CHN
+                //     #if defined TEMP_AMBIENT_CHN
+                //         case TEMP_AMBIENT_CHN:
+                //             SERIAL_PROTOCOLLN("ADC channel: TEMP_AMBIENT_CHN");                        
+                //             SERIAL_PROTOCOL("Channel: ");
+                //             SERIAL_PROTOCOL_F(chn, DEC);
+                //             SERIAL_PROTOCOL("   adc_channel_idx: ");
+                //             SERIAL_PROTOCOLLNE(adc_channel_idx, DEC);
+                //             break;
+                //     #endif  // TEMP_AMBIENT_CHN
+                //     #if defined VOLT_IR_CHN           
+                //         case (VOLT_IR_CHN):
+                //             SERIAL_PROTOCOLLN("ADC channel: VOLT_IR_CHN");
+                //             SERIAL_PROTOCOL("Channel: ");
+                //             SERIAL_PROTOCOL_F(chn, DEC);
+                //             SERIAL_PROTOCOL("   adc_channel_idx: ");
+                //             SERIAL_PROTOCOLLNE(adc_channel_idx, DEC);
+                //             break;
+                //     #endif  // VOLT_IR_CHN
+                //     #if defined VOLT_BED_CHN
+                //         case (VOLT_BED_CHN):
+                //             SERIAL_PROTOCOLLN("ADC channel: VOLT_BED_CHN");
+                //             SERIAL_PROTOCOL("Channel: ");
+                //             SERIAL_PROTOCOL_F(chn, DEC);
+                //             SERIAL_PROTOCOL("   adc_channel_idx: ");
+                //             SERIAL_PROTOCOLLNE(adc_channel_idx, DEC);
+                //             break;
+                //     #endif  // VOLT_BED_CHN
+                //         default:
+                //             SERIAL_PROTOCOLLN("ADC ERROR: Incorrect channel selected!");
+                //             SERIAL_PROTOCOL("Channel: ");
+                //             SERIAL_PROTOCOL_F(chn, DEC);
+                //             SERIAL_PROTOCOL("   adc_channel_idx: ");
+                //             SERIAL_PROTOCOLLNE(adc_channel_idx, DEC);
+                //             break;
+                // }
+
+                break;
+            }          
         }
     }
     ADCSRA |= (1 << ADSC); //start conversion

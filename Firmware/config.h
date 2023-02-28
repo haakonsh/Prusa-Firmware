@@ -4,6 +4,8 @@
 
 #include "Configuration_prusa.h"
 #include "pins.h"
+#include <avr/io.h>
+#include <stdint.h>
 
 #if (defined(VOLT_IR_PIN) && defined(IR_SENSOR))
 // TODO: IR_SENSOR_ANALOG currently disabled as being incompatible with the new thermal regulation
@@ -12,9 +14,97 @@
 
 //ADC configuration
 #ifndef IR_SENSOR_ANALOG
-#define ADC_CHAN_MSK      0b0000000000000011 // TODO: defaultmask0b0000001001011111 -> used AD channels bit mask (0,1,2,3,4,6,9) 
-#define ADC_DIDR_MSK      0b0000001001011111 //AD channels DIDR mask (1 ~ disabled digital input)
-#define ADC_CHAN_CNT      2         //number of used channels) TODO: should be 7
+#define ADC_CHAN_MSK      0b0000001000000100 // TODO: defaultmask0b0000001001011111 -> used AD channels bit mask (0,1,2,3,4,6,9) 
+#define ADC_DIDR_MSK      0b0000000001011111 //AD channels DIDR mask (1 ~ disabled digital input) decoupled pin mas from adc channel mask 
+#define ADC_CHAN_CNT      10         //number of used channels
+
+
+#if !defined(HEATER_0_USES_PT1000_DIFF_10X_GAIN)  // HEATER_0_USES_PT1000_DIFF_10X_GAIN
+  #if defined(TEMP_0_PIN) && (TEMP_0_PIN > -1) // TEMP_0_PIN
+    #if (TEMP_0_PIN & (0x7 << MUX3))  // ADC8+
+      #define TEMP_0_CHN ((1 << 5)) + (TEMP_0_PIN & 0x7))
+    #else 
+      #define TEMP_0_CHN TEMP_0_PIN
+    #endif //ADC8+
+    #define TEMP_0_IDX 0
+  #endif // TEMP_0_PIN
+
+  #if defined(TEMP_1_PIN) && (TEMP_1_PIN > -1) // TEMP_1_PIN
+    #if (TEMP_1_PIN & (0x7 << MUX3))  // ADC8+
+      #define TEMP_1_CHN ((1 << 5) + (TEMP_1_PIN & 0x7))
+    #else 
+      #define TEMP_1_CHN TEMP_1_PIN
+    #endif //ADC8+
+    #define TEMP_1_IDX 1
+  #endif // TEMP_1_PIN
+#else
+  #define TEMP_0_CHN (0x09)
+  #define TEMP_0_IDX 0
+#endif  // HEATER_0_USES_PT1000_DIFF_10X_GAIN
+
+#if defined(TEMP_2_PIN) && (TEMP_2_PIN > -1) // TEMP_2_PIN
+  #if (TEMP_2_PIN & (0x7 << MUX3))  // ADC8+
+    #define TEMP_2_CHN ((1 << 5) + (TEMP_2_PIN & 0x7))
+  #else 
+    #define TEMP_2_CHN TEMP_2_PIN
+  #endif //ADC8+
+  #define TEMP_2_IDX 2
+#endif // TEMP_2_PIN 
+
+#if (defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)) // TEMP_BED_PIN //TODO: 2 becomes 10 !? --> = TEMP_BED_PIN + 4    / (1 << 3)
+  #if (TEMP_BED_PIN & (0x7 << MUX3))  // ADC8+
+    #define TEMP_BED_CHN ((1 << 5)) + (TEMP_BED_PIN & 0x7))
+  #else 
+    #define TEMP_BED_CHN TEMP_BED_PIN
+  #endif //ADC8+
+    #define TEMP_BED_IDX 3
+#endif // TEMP_BED_PIN
+
+#if defined(TEMP_AMBIENT_PIN) && (TEMP_AMBIENT_PIN > -1) // TEMP_AMBIENT_PIN
+  #if (TEMP_AMBIENT_PIN & (0x7 << MUX3))  // ADC8+
+    #define TEMP_AMBIENT_CHN ((1 << 5) + (TEMP_AMBIENT_PIN & 0x7))
+  #else 
+    #define TEMP_AMBIENT_CHN TEMP_AMBIENT_PIN
+  #endif //ADC8+
+  #define TEMP_AMBIENT_IDX 4
+#endif // TEMP_AMBIENT_PIN
+
+#if defined(TEMP_PINDA_PIN) && (TEMP_PINDA_PIN > -1) // TEMP_PINDA_PIN
+  #if (TEMP_PINDA_PIN & (0x7 << MUX3))  // ADC8+
+    #define TEMP_PINDA_CHN ((1 << 5) + (TEMP_PINDA_PIN & 0x7))
+  #else 
+    #define TEMP_PINDA_CHN TEMP_PINDA_PIN
+  #endif //ADC8+
+  #define TEMP_PINDA_IDX 5  
+#endif // TEMP_PINDA_PIN
+
+#if defined(VOLT_PWR_PIN) && (VOLT_PWR_PIN > -1) // VOLT_PWR_PIN
+  #if (VOLT_PWR_PIN & (0x7 << MUX3))  // ADC8+
+    #define VOLT_PWR_CHN ((1 << 5) + (VOLT_PWR_PIN & 0x7))
+  #else 
+    #define VOLT_PWR_CHN VOLT_PWR_PIN
+  #endif //ADC8+
+  #define VOLT_PWR_IDX 6
+#endif // VOLT_PWR_PIN
+
+#if defined(VOLT_BED_PIN) && (VOLT_BED_PIN > -1) // VOLT_BED_PIN
+  #if (VOLT_BED_PIN & (0x7 << MUX3))  // ADC8+
+    #define VOLT_BED_CHN ((1 << 5) + (VOLT_BED_PIN & 0x7))
+  #else 
+    #define VOLT_BED_CHN VOLT_BED_PIN
+  #endif //ADC8+
+  #define VOLT_BED_IDX 7
+#endif // VOLT_BED_PIN
+
+#if defined(VOLT_IR_PIN) && (VOLT_IR_PIN > -1) // VOLT_IR_PIN
+  #if (VOLT_IR_PIN &(0x7 << MUX3))  // ADC8+
+    #define VOLT_IR_CHN ((1 << 5) + (VOLT_IR_PIN & 0x7))
+  #else 
+    #define VOLT_IR_CHN VOLT_IR_PIN
+  #endif //ADC8+
+  #define VOLT_IR_IDX 8
+#endif // VOLT_IR_PIN
+
 #else //!IR_SENSOR_ANALOG
 #define ADC_CHAN_MSK      0b0000001101011111 //used AD channels bit mask (0,1,2,3,4,6,8,9)
 #define ADC_DIDR_MSK      0b0000001001011111 //AD channels DIDR mask (1 ~ disabled digital input)
