@@ -41,8 +41,8 @@ static void adc_reset()
             adc_channel_idx++;
         }            
     }
-    SERIAL_PROTOCOL("First channel index: ");
-    SERIAL_PROTOCOLLNE(adc_channel_idx, DEC);
+    // SERIAL_PROTOCOL("\nFirst channel index: ");
+    // SERIAL_PROTOCOL_F(adc_channel_idx, DEC);
     memset((void*)adc_values, 0, sizeof(adc_values));
 }
 
@@ -159,8 +159,8 @@ static bool adc_setmux(uint8_t ch_idx)
         #endif  // VOLT_IR_CHN
 
         default:
-            SERIAL_PROTOCOL("Channel index not in use: ");
-            SERIAL_PROTOCOLLNE(ch_idx, DEC);
+            // SERIAL_PROTOCOL("\nChannel index not in use: ");
+            // SERIAL_PROTOCOL_F(ch_idx, DEC);
             return false;        
     }
 }
@@ -176,14 +176,18 @@ extern void ADC_CALLBACK();
 
 ISR(ADC_vect)
 {
-    if(ADC & 0x200)    // Check the sign bit (10th)
+#if defined(HEATER_0_USES_PT1000_DIFF_10X_GAIN)
+    
+    if((adc_channel_idx == TEMP_0_IDX) && (ADC & 0x200))    // Check the sign bit (10th)
     {        
         adc_values[adc_channel_idx] += ADC | 0xFC00; // Pad 1's (two's complement)
     }
     else
+#endif //HEATER_0_USES_PT1000_DIFF_10X_GAIN
     {
         adc_values[adc_channel_idx] += ADC;
     }
+
       
     if (++adc_count == ADC_OVRSAMPL) 
     {

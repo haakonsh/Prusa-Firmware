@@ -22,7 +22,7 @@
 #if !defined(HEATER_0_USES_PT1000_DIFF_10X_GAIN)  // HEATER_0_USES_PT1000_DIFF_10X_GAIN
   #if defined(TEMP_0_PIN) && (TEMP_0_PIN > -1) // TEMP_0_PIN
     #if (TEMP_0_PIN & (0x7 << MUX3))  // ADC8+
-      #define TEMP_0_CHN ((1 << 5)) + (TEMP_0_PIN & 0x7))
+      #define TEMP_0_CHN ((1 << 5) + (TEMP_0_PIN & 0x7))
     #else 
       #define TEMP_0_CHN TEMP_0_PIN
     #endif //ADC8+
@@ -53,7 +53,7 @@
 
 #if (defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)) // TEMP_BED_PIN //TODO: 2 becomes 10 !? --> = TEMP_BED_PIN + 4    / (1 << 3)
   #if (TEMP_BED_PIN & (0x7 << MUX3))  // ADC8+
-    #define TEMP_BED_CHN ((1 << 5)) + (TEMP_BED_PIN & 0x7))
+    #define TEMP_BED_CHN ((1 << 5) + (TEMP_BED_PIN & 0x7))
   #else 
     #define TEMP_BED_CHN TEMP_BED_PIN
   #endif //ADC8+

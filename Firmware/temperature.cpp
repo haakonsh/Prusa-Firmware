@@ -127,7 +127,7 @@ int current_voltage_raw_bed = 0;
 uint16_t current_voltage_raw_IR = 0;
 #endif //IR_SENSOR_ANALOG
 
-int16_t current_temperature_bed_raw = 0;
+uint16_t current_temperature_bed_raw = 0;
 float current_temperature_bed = 0.0;
   
 
@@ -612,7 +612,7 @@ static float analog2temp(int raw, uint8_t e) {
 
   #ifdef HEATER_0_USES_THERMISTOR_DIFF_10X_GAIN
     volatile float rth = DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTORS / \
-    ( (1.0/((((float)raw / OVERSAMPLENR) / DIFFERENTIAL_ADC_RANGE)\
+    ( (1.0/((((float)raw / OVERSAMPLENR) / (DIFFERENTIAL_ADC_RANGE * DIFFERENTIAL_ADC_GAIN_FACTOR))\
      + DIFFERENTIAL_ADC_REFERENCE_RESISTOR_RATIO)) - 1);
     // SERIAL_PROTOCOL("Rth [Ohm]: ");
     // SERIAL_PROTOCOL_F(rth, 7);
@@ -624,8 +624,6 @@ static float analog2temp(int raw, uint8_t e) {
     SERIAL_PROTOCOL(" \n");
     SERIAL_PROTOCOL(" \n");
 
-
-
     volatile float log_rth = log(rth);  
     volatile float tempc = (1.0/(A_ + B_*log_rth + C_*log_rth*log_rth*log_rth)) - 273.15;
 
@@ -635,19 +633,62 @@ static float analog2temp(int raw, uint8_t e) {
     SERIAL_PROTOCOL(" \n");
     return tempc;
   #endif
-  #ifdef HEATER_0_USES_PT1000_DIFF_10X_GAIN
-    volatile float prt = DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTORS / \
-    ( (1.0/((((float)raw / OVERSAMPLENR) / DIFFERENTIAL_ADC_RANGE)\
-     + DIFFERENTIAL_ADC_REFERENCE_RESISTOR_RATIO)) - 1);
-    // Solve for the positive root by "completing the square"
-    volatile float tempc = -U_ + sqrtf(UU_ - (1 - (prt/PT1000_R0))/B_);
 
-    SERIAL_PROTOCOL("PRT [Ohm]: ");
-    SERIAL_PROTOCOLLNE(prt, 1);
-    SERIAL_PROTOCOL("Temperature [C]: ");
-    SERIAL_PROTOCOLLNE(tempc, 1);
+  #ifdef HEATER_0_USES_PT1000_DIFF_10X_GAIN
+
+    SERIAL_PROTOCOL("\nDiff ADC code:   ");
+    SERIAL_PROTOCOL_F(raw/OVERSAMPLENR, DEC);
+    volatile float vdiff = ((raw / OVERSAMPLENR) * (DIFFERENTIAL_ADC_V / DIFFERENTIAL_ADC_RANGE))/ DIFFERENTIAL_ADC_GAIN_FACTOR;
+    SERIAL_PROTOCOL("\nVdiff[V]:        ");
+    SERIAL_PROTOCOL_F(vdiff, 3);
+//     SERIAL_PROTOCOL("\ntemperature_raw:       ");
+//     SERIAL_PROTOCOL_F(current_temperature_raw[0]/OVERSAMPLENR, DEC);
+
+//     SERIAL_PROTOCOL("\ntemperature_bed_raw:     ");
+//     SERIAL_PROTOCOL_F(current_temperature_bed_raw/OVERSAMPLENR, DEC);
+// #ifdef PINDA_THERMISTOR
+//     SERIAL_PROTOCOL("\ntemperature_raw_pinda:   ");
+//     SERIAL_PROTOCOL_F(current_temperature_raw_pinda/OVERSAMPLENR, DEC);
+// #endif //PINDA_THERMISTOR
+// #ifdef AMBIENT_THERMISTOR
+//     SERIAL_PROTOCOL("\ntemperature_raw_ambient: ");
+//     SERIAL_PROTOCOL_F(current_temperature_raw_ambient/OVERSAMPLENR, DEC);
+// #endif //AMBIENT_THERMISTOR
+// #ifdef VOLT_PWR_PIN
+//     SERIAL_PROTOCOL("\nvoltage_raw_pwr:         ");
+//     SERIAL_PROTOCOL_F(current_voltage_raw_pwr/OVERSAMPLENR, DEC);
+// #endif
+// #ifdef VOLT_BED_PIN
+//     SERIAL_PROTOCOL("\nvoltage_raw_bed:         ");
+//     SERIAL_PROTOCOL_F(current_voltage_raw_bed/OVERSAMPLENR, DEC);
+// #endif
+// #ifdef IR_SENSOR_ANALOG
+//     SERIAL_PROTOCOL("\nvoltage_raw_IR:          ");
+//     SERIAL_PROTOCOL_F(current_voltage_raw_IR/OVERSAMPLENR, DEC);
+// #endif //IR_SENSOR_ANALOG   
+
+    volatile float vprt = vdiff + DIFFERENTIAL_ADC_V_REF;
+    SERIAL_PROTOCOL("\nVprt[V]:         ");
+    SERIAL_PROTOCOL_F(vprt, 3);
+
+    volatile float a = vprt/DIFFERENTIAL_ADC_V;
+    volatile float prt = (DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTOR_PRT * a) / ( 1.0 - a);
+
+    volatile float tempc_1 = (prt - 1000.0)/3.85055;
+  
+    // Solve for the positive root by "completing the square"
+    volatile float tempc = -U_ + sqrtf(UU_ - (1.0 - (prt/PT1000_R0))/B_);
+
+    SERIAL_PROTOCOL("\nPRT [Ohm]:       ");
+    SERIAL_PROTOCOL_F(prt, 1);
+    SERIAL_PROTOCOL("\nTemperature by spec [C]: ");
+    SERIAL_PROTOCOL_F(tempc_1, 1);
+    SERIAL_PROTOCOL("\nTemperature calibrated [C]: ");
+    SERIAL_PROTOCOL_F(tempc, 1);
+    SERIAL_PROTOCOL("\n");
     return tempc;
-  #endif
+
+  #endif  //HEATER_0_USES_PT1000_DIFF_10X_GAIN
 
   if(heater_ttbl_map[e] != NULL)
   {
@@ -2142,33 +2183,8 @@ void adc_callback()
 #ifdef IR_SENSOR_ANALOG
     current_voltage_raw_IR = adc_values[VOLT_IR_IDX];
 #endif //IR_SENSOR_ANALOG
-    adc_values_ready = true; 
-
-    SERIAL_PROTOCOL("temperature_raw:       ");
-    SERIAL_PROTOCOLLNE(current_temperature_raw[0]/OVERSAMPLENR, DEC);
-    SERIAL_PROTOCOL("temperature_bed_raw:     ");
-    SERIAL_PROTOCOLLNE(current_temperature_bed_raw/OVERSAMPLENR, DEC);
-#ifdef PINDA_THERMISTOR
-    SERIAL_PROTOCOL("temperature_raw_pinda:   ");
-    SERIAL_PROTOCOLLNE(current_temperature_raw_pinda/OVERSAMPLENR, DEC);
-#endif //PINDA_THERMISTOR
-#ifdef AMBIENT_THERMISTOR
-    SERIAL_PROTOCOL("temperature_raw_ambient: ");
-    SERIAL_PROTOCOLLNE(current_temperature_raw_ambient/OVERSAMPLENR, DEC);
-#endif //AMBIENT_THERMISTOR
-#ifdef VOLT_PWR_PIN
-    SERIAL_PROTOCOL("voltage_raw_pwr:         ");
-    SERIAL_PROTOCOLLNE(current_voltage_raw_pwr/OVERSAMPLENR, DEC);
-#endif
-#ifdef VOLT_BED_PIN
-    SERIAL_PROTOCOL("voltage_raw_bed:         ");
-    SERIAL_PROTOCOLLNE(current_voltage_raw_bed/OVERSAMPLENR, DEC);
-#endif
-#ifdef IR_SENSOR_ANALOG
-    SERIAL_PROTOCOL("voltage_raw_IR:          ");
-    SERIAL_PROTOCOLLNE(current_voltage_raw_IR/OVERSAMPLENR, DEC);
-#endif //IR_SENSOR_ANALOG                                                              
-    adc_values_ready = true;
+                                                           
+  adc_values_ready = true;
 }
 
 static void setCurrentTemperaturesFromIsr()
