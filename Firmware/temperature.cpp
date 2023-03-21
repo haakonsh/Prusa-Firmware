@@ -127,7 +127,7 @@ int current_voltage_raw_bed = 0;
 uint16_t current_voltage_raw_IR = 0;
 #endif //IR_SENSOR_ANALOG
 
-uint16_t current_temperature_bed_raw = 0;
+int16_t current_temperature_bed_raw = 0;
 float current_temperature_bed = 0.0;
   
 
@@ -665,19 +665,19 @@ static float analog2temp(int raw, uint8_t e) {
     volatile float vprt = vdiff + DIFFERENTIAL_ADC_V_REF; 
     volatile float a = vprt/DIFFERENTIAL_ADC_V;
     volatile float prt = (DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTOR_PRT * a) / ( 1.0 - a);
-    volatile float tempc = (prt - 1000.0)/3.85055;
+    volatile float tempc = (-PtA + (sqrtf((PtA*PtA) - 4*PtB*(1.0 - (prt/1000.0))))) / (2 * PtB); // Alternative linear func: (prt - 1000.0)/3.85055;
 
-    SERIAL_PROTOCOL("\nDiff ADC code:   ");
-    SERIAL_PROTOCOL_F(raw/OVERSAMPLENR, DEC);
-    SERIAL_PROTOCOL("\nVdiff[V]:        ");
-    SERIAL_PROTOCOL_F(vdiff, 3);
-    SERIAL_PROTOCOL("\nVprt[V]:         ");
-    SERIAL_PROTOCOL_F(vprt, 3);
-    SERIAL_PROTOCOL("\nPRT [Ohm]:       ");
-    SERIAL_PROTOCOL_F(prt, 1);
-    SERIAL_PROTOCOL("\nTemperature [C]: ");
-    SERIAL_PROTOCOL_F(tempc, 1);
-    SERIAL_PROTOCOL("\n");
+    // SERIAL_PROTOCOL("\nDiff ADC code:   ");
+    // SERIAL_PROTOCOL_F(raw/OVERSAMPLENR, DEC);
+    // SERIAL_PROTOCOL("\nVdiff[V]:        ");
+    // SERIAL_PROTOCOL_F(vdiff, 3);
+    // SERIAL_PROTOCOL("\nVprt[V]:         ");
+    // SERIAL_PROTOCOL_F(vprt, 3);
+    // SERIAL_PROTOCOL("\nPRT [Ohm]:       ");
+    // SERIAL_PROTOCOL_F(prt, 1);
+    // SERIAL_PROTOCOL("\nTemperature [C]: ");
+    // SERIAL_PROTOCOL_F(tempc, 1);
+    // SERIAL_PROTOCOL("\n");
     return tempc;
 
   #endif  //HEATER_0_USES_PT1000_DIFF_10X_GAIN
@@ -1651,7 +1651,7 @@ void check_max_temp_raw()
 #if HEATER_0_RAW_LO_TEMP > HEATER_0_RAW_HI_TEMP
     if (current_temperature_raw[0] <= maxttemp_raw[0]) {
 #else
-    if (current_temperature_raw[0] >= maxttemp_raw[0]) {
+    if (current_temperature_raw[0] >= maxttemp_raw[0]) { 
 #endif
         set_temp_error(TempErrorSource::hotend, 0, TempErrorType::max); 
     }

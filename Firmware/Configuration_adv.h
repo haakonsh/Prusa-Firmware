@@ -395,7 +395,9 @@ const unsigned int dropsegments=5; //everything with less than this number of st
 
 #if TEMP_SENSOR_0 > 0
   #define THERMISTORHEATER_0 TEMP_SENSOR_0
+# if !defined(HEATER_0_USES_PT1000_DIFF_10X_GAIN)
   #define HEATER_0_USES_THERMISTOR
+# endif // HEATER_0_USES_PT1000_DIFF_10X_GAIN
 #endif
 #if TEMP_SENSOR_1 > 0
   #define THERMISTORHEATER_1 TEMP_SENSOR_1

@@ -2,6 +2,7 @@
 #define THERMISTORTABLES_H_
 
 #include "Configuration_adv.h"
+#include "variants/Configuration_prusa.h"
 #include <avr/pgmspace.h>
 
 #define OVERSAMPLENR 16
@@ -1422,8 +1423,13 @@ const short temptable_2000[][2] PROGMEM = {
 #  define HEATER_0_RAW_HI_TEMP 0
 #  define HEATER_0_RAW_LO_TEMP 16383
 # else                          //In case of an thermocouple the highest temperature results in the highest ADC value
-#  define HEATER_0_RAW_HI_TEMP 16383
-#  define HEATER_0_RAW_LO_TEMP 0
+#  ifdef HEATER_0_USES_PT1000_DIFF_10X_GAIN
+#   define HEATER_0_RAW_HI_TEMP 5952
+#   define HEATER_0_RAW_LO_TEMP -5040
+#  else
+#   define HEATER_0_RAW_HI_TEMP 16383
+#   define HEATER_0_RAW_LO_TEMP 0
+#  endif
 # endif
 #endif
 

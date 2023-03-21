@@ -431,7 +431,7 @@
 #endif //   HEATER_0_USES_THERMISTOR_DIFF_10X_GAIN
 
 
-#define HEATER_0_USES_PT1000_DIFF_10X_GAIN // PT1000 TRD is used, diff input with a 150Ohm ref load at TEMP1
+#define HEATER_0_USES_PT1000_DIFF_10X_GAIN 1048 // PT1000 TRD is used, diff input with a 150Ohm ref load at TEMP1
 #ifdef HEATER_0_USES_PT1000_DIFF_10X_GAIN // PT1000 TRD is used, diff input with a 150Ohm ref load at TEMP1
 
 #define DIFFERENTIAL_ADC_CHANNEL_IDX 9
@@ -672,6 +672,8 @@
 #define TEMP_SENSOR_0 247
 #elif defined(E3D_PT100_EXTRUDER_NO_AMP)
 #define TEMP_SENSOR_0 148
+#elif defined(HEATER_0_USES_PT1000_DIFF_10X_GAIN)
+#define TEMP_SENSOR_0 HEATER_0_USES_PT1000_DIFF_10X_GAIN
 #else
 #define TEMP_SENSOR_0 5
 #endif

@@ -76,7 +76,7 @@ void countFanSpeed()
 static void fanSpeedErrorBeep(const char *serialMsg, const char *lcdMsg){
     SERIAL_ECHOLNRPGM(serialMsg);
     if (get_message_level() == 0) {
-        Sound_MakeCustom(200,0,true);
+        Sound_MakeCustom(50,0,true);
         LCD_ALERTMESSAGERPGM(lcdMsg);
     }
 }
