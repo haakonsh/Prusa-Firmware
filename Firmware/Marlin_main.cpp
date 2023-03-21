@@ -2442,7 +2442,7 @@ void force_high_power_mode(bool start_high_power_section) {
 
 void gcode_M105(uint8_t extruder)
 {
-/*#if defined(TEMP_0_PIN) && TEMP_0_PIN > -1
+#if defined(TEMP_0_PIN) && TEMP_0_PIN > -1
     SERIAL_PROTOCOLPGM("T:");
     SERIAL_PROTOCOL_F(degHotend(extruder),1);
     SERIAL_PROTOCOLPGM(" /");
@@ -2491,12 +2491,12 @@ void gcode_M105(uint8_t extruder)
     SERIAL_PROTOCOLPGM(" A:");
     SERIAL_PROTOCOL_F(current_temperature_ambient,1);
 #endif //AMBIENT_THERMISTOR
-*/
+
 
 #ifdef SHOW_TEMP_ADC_VALUES
     {
         float raw = 0.0;
-/*#if defined(TEMP_BED_PIN) && TEMP_BED_PIN > -1
+#if defined(TEMP_BED_PIN) && TEMP_BED_PIN > -1
         SERIAL_PROTOCOLPGM("    ADC B:");
         SERIAL_PROTOCOL_F(degBed(),1);
         SERIAL_PROTOCOLPGM("C->");
@@ -2506,7 +2506,7 @@ void gcode_M105(uint8_t extruder)
         SERIAL_PROTOCOL_F(100 * (1 + (PtA * (raw/OVERSAMPLENR)) + (PtB * sq((raw/OVERSAMPLENR)))), 5);
         SERIAL_PROTOCOLPGM(" Rxb->");
         SERIAL_PROTOCOL_F(raw, 5);
-#endif*/
+#endif
         for (int8_t cur_extruder = 0; cur_extruder < EXTRUDERS; ++cur_extruder) {
             SERIAL_PROTOCOLPGM("  T");
             SERIAL_PROTOCOL(cur_extruder);

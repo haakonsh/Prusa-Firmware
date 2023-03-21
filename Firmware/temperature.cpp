@@ -635,12 +635,7 @@ static float analog2temp(int raw, uint8_t e) {
   #endif
 
   #ifdef HEATER_0_USES_PT1000_DIFF_10X_GAIN
-
-    SERIAL_PROTOCOL("\nDiff ADC code:   ");
-    SERIAL_PROTOCOL_F(raw/OVERSAMPLENR, DEC);
-    volatile float vdiff = ((raw / OVERSAMPLENR) * (DIFFERENTIAL_ADC_V / DIFFERENTIAL_ADC_RANGE))/ DIFFERENTIAL_ADC_GAIN_FACTOR;
-    SERIAL_PROTOCOL("\nVdiff[V]:        ");
-    SERIAL_PROTOCOL_F(vdiff, 3);
+    
 //     SERIAL_PROTOCOL("\ntemperature_raw:       ");
 //     SERIAL_PROTOCOL_F(current_temperature_raw[0]/OVERSAMPLENR, DEC);
 
@@ -666,24 +661,21 @@ static float analog2temp(int raw, uint8_t e) {
 //     SERIAL_PROTOCOL("\nvoltage_raw_IR:          ");
 //     SERIAL_PROTOCOL_F(current_voltage_raw_IR/OVERSAMPLENR, DEC);
 // #endif //IR_SENSOR_ANALOG   
-
-    volatile float vprt = vdiff + DIFFERENTIAL_ADC_V_REF;
-    SERIAL_PROTOCOL("\nVprt[V]:         ");
-    SERIAL_PROTOCOL_F(vprt, 3);
-
+    volatile float vdiff = ((raw / OVERSAMPLENR) * (DIFFERENTIAL_ADC_V / DIFFERENTIAL_ADC_RANGE))/ DIFFERENTIAL_ADC_GAIN_FACTOR;
+    volatile float vprt = vdiff + DIFFERENTIAL_ADC_V_REF; 
     volatile float a = vprt/DIFFERENTIAL_ADC_V;
     volatile float prt = (DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTOR_PRT * a) / ( 1.0 - a);
+    volatile float tempc = (prt - 1000.0)/3.85055;
 
-    volatile float tempc_1 = (prt - 1000.0)/3.85055;
-  
-    // Solve for the positive root by "completing the square"
-    volatile float tempc = -U_ + sqrtf(UU_ - (1.0 - (prt/PT1000_R0))/B_);
-
+    SERIAL_PROTOCOL("\nDiff ADC code:   ");
+    SERIAL_PROTOCOL_F(raw/OVERSAMPLENR, DEC);
+    SERIAL_PROTOCOL("\nVdiff[V]:        ");
+    SERIAL_PROTOCOL_F(vdiff, 3);
+    SERIAL_PROTOCOL("\nVprt[V]:         ");
+    SERIAL_PROTOCOL_F(vprt, 3);
     SERIAL_PROTOCOL("\nPRT [Ohm]:       ");
     SERIAL_PROTOCOL_F(prt, 1);
-    SERIAL_PROTOCOL("\nTemperature by spec [C]: ");
-    SERIAL_PROTOCOL_F(tempc_1, 1);
-    SERIAL_PROTOCOL("\nTemperature calibrated [C]: ");
+    SERIAL_PROTOCOL("\nTemperature [C]: ");
     SERIAL_PROTOCOL_F(tempc, 1);
     SERIAL_PROTOCOL("\n");
     return tempc;
@@ -1661,7 +1653,7 @@ void check_max_temp_raw()
 #else
     if (current_temperature_raw[0] >= maxttemp_raw[0]) {
 #endif
-        //set_temp_error(TempErrorSource::hotend, 0, TempErrorType::max); //TODO: Disabled the ambient maxtemp error
+        set_temp_error(TempErrorSource::hotend, 0, TempErrorType::max); 
     }
     //bed
 #if defined(BED_MAXTEMP) && (TEMP_SENSOR_BED != 0)
@@ -1670,7 +1662,7 @@ void check_max_temp_raw()
 #else
     if (current_temperature_bed_raw >= bed_maxttemp_raw) {
 #endif
-        //set_temp_error(TempErrorSource::bed, 0, TempErrorType::max); //TODO: Disabled the bed maxtemp error
+        set_temp_error(TempErrorSource::bed, 0, TempErrorType::max); 
     }
 #endif
     //ambient
@@ -1680,7 +1672,7 @@ void check_max_temp_raw()
 #else
     if (current_temperature_raw_ambient >= ambient_maxttemp_raw) {
 #endif
-        //set_temp_error(TempErrorSource::ambient, 0, TempErrorType::max);//TODO: Disabled the ambient maxtemp error
+        set_temp_error(TempErrorSource::ambient, 0, TempErrorType::max);
     }
 #endif
 }
@@ -2365,8 +2357,7 @@ static void check_min_temp_raw()
             bCheckingOnBed=bCheckingOnBed||(current_temperature_bed_isr>(BED_MINTEMP+TEMP_HYSTERESIS)); // for eventually delay cutting
             if(oTimer4minTempBed.expired(BED_MINTEMP_DELAY)||(!oTimer4minTempBed.running())||bCheckingOnBed) {
                 bCheckingOnBed=true;  // not necessary
-                //check_min_temp_bed(); // delay is elapsed or temperature is/was over minTemp => periodical checking is active
-                //TODO: Uncomment
+                check_min_temp_bed(); // delay is elapsed or temperature is/was over minTemp => periodical checking is active
             }
         }
         else {
@@ -2380,7 +2371,7 @@ static void check_min_temp_raw()
     else {
         // ambient temperature is standard
         check_min_temp_heater0();
-        //check_min_temp_bed(); TODO: Uncomment
+        check_min_temp_bed(); 
     }
 #endif //AMBIENT_THERMISTOR
 }

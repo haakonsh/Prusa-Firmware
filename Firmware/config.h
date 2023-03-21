@@ -14,7 +14,7 @@
 
 //ADC configuration
 #ifndef IR_SENSOR_ANALOG
-#define ADC_CHAN_MSK      0b0000001000000100 // TODO: defaultmask0b0000001001011111 -> used AD channels bit mask (0,1,2,3,4,6,9) 
+#define ADC_CHAN_MSK      0b0000001001011111 //Default mask 0b0000001001011111 -> used AD channels bit mask (0,1,2,3,4,6,9) 
 #define ADC_DIDR_MSK      0b0000000001011111 //AD channels DIDR mask (1 ~ disabled digital input) decoupled pin mas from adc channel mask 
 #define ADC_CHAN_CNT      10         //number of used channels
 
@@ -51,7 +51,7 @@
   #define TEMP_2_IDX 2
 #endif // TEMP_2_PIN 
 
-#if (defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)) // TEMP_BED_PIN //TODO: 2 becomes 10 !? --> = TEMP_BED_PIN + 4    / (1 << 3)
+#if (defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)) // TEMP_BED_PIN
   #if (TEMP_BED_PIN & (0x7 << MUX3))  // ADC8+
     #define TEMP_BED_CHN ((1 << 5) + (TEMP_BED_PIN & 0x7))
   #else 

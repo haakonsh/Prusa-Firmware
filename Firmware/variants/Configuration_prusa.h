@@ -304,14 +304,14 @@
  *------------------------------------*/
 
 // Mintemps
-#define HEATER_0_MINTEMP 0 //TODO: default 10
-#define HEATER_1_MINTEMP 0 //TODO: default 5
-#define HEATER_2_MINTEMP 0 //TODO: default 5
+#define HEATER_0_MINTEMP 10 //default 10
+#define HEATER_1_MINTEMP 5 //default 5
+#define HEATER_2_MINTEMP 5 //default 5
 #define HEATER_MINTEMP_DELAY 15000                // [ms] ! if changed, check maximal allowed value @ ShortTimer
 #if HEATER_MINTEMP_DELAY>USHRT_MAX
 #error "Check maximal allowed value @ ShortTimer (see HEATER_MINTEMP_DELAY definition)"
 #endif
-#define BED_MINTEMP 0 //TODO: default 10
+#define BED_MINTEMP 10 //default 10
 #define BED_MINTEMP_DELAY 50000                   // [ms] ! if changed, check maximal allowed value @ ShortTimer
 #if BED_MINTEMP_DELAY>USHRT_MAX
 #error "Check maximal allowed value @ ShortTimer (see BED_MINTEMP_DELAY definition)"
@@ -325,12 +325,12 @@
 #if defined(E3D_PT100_EXTRUDER_WITH_AMP) || defined(E3D_PT100_EXTRUDER_NO_AMP)
 #define HEATER_0_MAXTEMP 410
 #else
-#define HEATER_0_MAXTEMP 16383  //305 TODO: Should be 305C
+#define HEATER_0_MAXTEMP 305  //Should be 305C
 #endif
-#define HEATER_1_MAXTEMP 16383  //TODO: Should be 305C
-#define HEATER_2_MAXTEMP 16383  //TODO: Should be 305C
-#define BED_MAXTEMP 16383       //TODO: Should be 125C
-#define AMBIENT_MAXTEMP 16383   //TODO: Should be 100C
+#define HEATER_1_MAXTEMP 305  //Should be 305C
+#define HEATER_2_MAXTEMP 305  //Should be 305C
+#define BED_MAXTEMP 125       //Should be 125C
+#define AMBIENT_MAXTEMP 100   //Should be 100C
 
 #if defined(E3D_PT100_EXTRUDER_WITH_AMP) || defined(E3D_PT100_EXTRUDER_NO_AMP)
 // Define PID constants for extruder with PT100
@@ -407,9 +407,6 @@
  ADDITIONAL FEATURES SETTINGS
  *------------------------------------*/
 
-// Define Prusa filament runout sensor
-//#define FILAMENT_RUNOUT_SUPPORT
-
 //#define HEATER_0_USES_THERMISTOR_DIFF_10X_GAIN // NT104GT-2 thermistor is used, diff input with a 44Ohm ref load at TEMP1
 #ifdef HEATER_0_USES_THERMISTOR_DIFF_10X_GAIN // NT104GT-2 thermistor is used, diff input with a 44Ohm ref load at TEMP1
 
@@ -442,10 +439,9 @@
 #define DIFFERENTIAL_ADC_RANGE 497.0 // ( 2^(10-1) - 1) Sign bit offsets range by 511
 #define DIFFERENTIAL_ADC_V 4.985
 #define DIFFERENTIAL_ADC_V_REF (DIFFERENTIAL_ADC_V * (DIFFERENTIAL_ADC_REFERENCE_RESISTOR_RATIO))
-#define DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTOR_PRT 4676.17 // Ohm  TODO: Calibrate value
-// #define DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTOR_PRT 4660.112 // Ohm  TODO: Calibrate value
-#define DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTOR_REF 4687.155 // Ohm  TODO: Calibrate value
-#define DIFFERENTIAL_ADC_REFERENCE_RESISTOR 1472.0 // Ohm   TODO: Calibrate value
+#define DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTOR_PRT 4676.17 // Ohm, Calibrated value
+#define DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTOR_REF 4687.155 // Ohm, Calibrated value
+#define DIFFERENTIAL_ADC_REFERENCE_RESISTOR 1472.0 // Ohm, Calibrated value
 #define DIFFERENTIAL_ADC_REFERENCE_RESISTOR_RATIO (DIFFERENTIAL_ADC_REFERENCE_RESISTOR/(DIFFERENTIAL_ADC_REFERENCE_RESISTOR + DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTOR_REF))
 #define PT1000_R0 996.4 // Ohm at 0'C
 
@@ -457,10 +453,11 @@
 #define UU_ (U_ * U_)
 #define W_ (U_ * PT1000_R0)
 
-
 #endif //   HEATER_0_USES_PT1000_DIFF_10X_GAIN
 
 
+// Define Prusa filament runout sensor
+#define FILAMENT_RUNOUT_SUPPORT
 #ifdef FILAMENT_RUNOUT_SUPPORT
 #define FILAMENT_RUNOUT_SENSOR 1
 #endif
