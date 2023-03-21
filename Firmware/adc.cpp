@@ -12,7 +12,6 @@ volatile int16_t adc_values[ADC_CHAN_CNT];  // Changed from uint to int for diff
 
 static void adc_reset();
 static bool adc_setmux(uint8_t ch);
-// volatile uint8_t chn = 0;
 
 void adc_init()
 {

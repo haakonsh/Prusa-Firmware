@@ -60,7 +60,6 @@
 #define HEATER_BED_PIN       4 //PG5
 #define TEMP_BED_PIN         2 //A2
 
-
 #define HEATER_0_PIN         3 //PE5
 #define TEMP_0_PIN           0 //A0
 

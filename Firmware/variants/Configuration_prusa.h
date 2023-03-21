@@ -164,14 +164,14 @@
 // this value is litlebit higher that real limit, because ambient termistor is on the board and is temperated from it,
 // temperature inside the case is around 31C for ambient temperature 25C, when the printer is powered on long time and idle
 // the real limit is 15C (same as MINTEMP limit), this is because 15C is end of scale for both used thermistors (bed, heater)
-#define MINTEMP_MINAMBIENT      0  // Default 10
-#define MINTEMP_MINAMBIENT_RAW  1023 // Default 1002
+#define MINTEMP_MINAMBIENT      10  // Default 10
+#define MINTEMP_MINAMBIENT_RAW  1002 // Default 1002
 
 #define DEBUG_DCODE2
 #define DEBUG_DCODE3
 #define DEBUG_DCODE6
 
-#define DEBUG_BUILD     //Uncomment to disable DEBUG mode
+// #define DEBUG_BUILD     //Uncomment to disable DEBUG mode
 //#define DEBUG_SEC_LANG   //secondary language debug output at startup
 //#define DEBUG_XFLASH   //debug external spi flash
 #ifdef DEBUG_BUILD
