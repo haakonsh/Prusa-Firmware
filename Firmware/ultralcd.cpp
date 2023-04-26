@@ -3759,13 +3759,13 @@ void lcd_mesh_bedleveling()
 
 void lcd_mesh_calibration()
 {
-  enquecommand_P(PSTR("M45"));
+  enquecommand_P(PSTR("M45 V20"));
   lcd_return_to_status();
 }
 
 void lcd_mesh_calibration_z()
 {
-  enquecommand_P(PSTR("M45 Z"));
+  enquecommand_P(PSTR("M45 Z V20"));
   lcd_return_to_status();
 }
 
@@ -6576,7 +6576,7 @@ static void reset_crash_det(uint8_t axis) {
 }
 
 static bool lcd_selfcheck_axis_sg(uint8_t axis) {
-// each axis length is measured twice	
+// each axis length is measured twice
 	float axis_length, current_position_init, current_position_final;
 	float measured_axis_length[2];
 	float margin = 60;
@@ -6809,7 +6809,7 @@ static bool lcd_selfcheck_pulleys(int axis)
 	refresh_cmd_timeout();
 	manage_inactivity(true);
 
-	if (axis == 0) move = 50; //X_AXIS 
+	if (axis == X_AXIS) move = 50; //X_AXIS 
 	else move = 50; //Y_AXIS
 
 	current_position_init = current_position[axis];

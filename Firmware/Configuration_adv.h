@@ -50,7 +50,7 @@
 // When first starting the main fan, run it at full speed for the
 // given number of milliseconds.  This gets the fan spinning reliably
 // before setting a PWM value. (Does not work with software PWM for fan on Sanguinololu)
-#define FAN_KICKSTART_TIME 800
+#define FAN_KICKSTART_TIME 1000
 
 /**
  * Auto-report all at once with M155 S<seconds> C[bitmask] with single timer
@@ -70,7 +70,7 @@
 //=============================Mechanical Settings===========================
 //===========================================================================
 
-#define ENDSTOPS_ONLY_FOR_HOMING // If defined the endstops will only be used for homing
+//#define ENDSTOPS_ONLY_FOR_HOMING // If defined the endstops will only be used for homing
 
 
 //// AUTOSET LOCATIONS OF LIMIT SWITCHES
@@ -242,7 +242,7 @@
 	#endif
 
 // Enabe this option to get a pretty message whenever the endstop gets hit (as in the position at which the endstop got triggered)
-//#define VERBOSE_CHECK_HIT_ENDSTOPS
+#define VERBOSE_CHECK_HIT_ENDSTOPS
 
 // Enable the option to stop SD printing when hitting and endstops, needs to be enabled from the LCD menu when this option is enabled.
 //#define ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED

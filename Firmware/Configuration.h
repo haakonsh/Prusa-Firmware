@@ -146,12 +146,12 @@ extern PGM_P sPrinterName;
 #define BANG_MAX 255 // limits current to nozzle while in bang-bang mode; 255=full current
 #define PID_MAX BANG_MAX // limits current to nozzle while PID is active; 255=full current
 #ifdef PIDTEMP
-  //#define PID_DEBUG // Sends debug data to the serial port.
-  //#define PID_OPENLOOP 1 // Puts PID in open loop. M104/M140 sets the output power from 0 to PID_MAX
-  //#define SLOW_PWM_HEATERS // PWM with very low frequency (roughly 0.125Hz=8s) and minimum state time of approximately 1s useful for heaters driven by a relay
-  #define PID_INTEGRAL_DRIVE_MAX PID_MAX  //limit for the integral term
-  #define PID_K1 0.95 //smoothing factor within the PID
-  #define PID_dT ((OVERSAMPLENR * 10.0)/(F_CPU / 64.0 / 256.0)) //sampling period of the temperature routine
+// #define PID_DEBUG // Sends debug data to the serial port.
+//#define PID_OPENLOOP 1 // Puts PID in open loop. M104/M140 sets the output power from 0 to PID_MAX
+//#define SLOW_PWM_HEATERS // PWM with very low frequency (roughly 0.125Hz=8s) and minimum state time of approximately 1s useful for heaters driven by a relay
+#define PID_INTEGRAL_DRIVE_MAX PID_MAX  //limit for the integral term
+#define PID_K1 0.95 //smoothing factor within the PID
+#define PID_dT ((OVERSAMPLENR * 10.0)/(F_CPU / 64.0 / 256.0)) //sampling period of the temperature routine
 
 // If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
 // Ultimaker
@@ -352,9 +352,9 @@ your extruder heater takes 2 minutes to hit the target on heating.
 
   // these are the offsets to the probe relative to the extruder tip (Hotend - Probe)
   // X and Y offsets must be integers
-  #define X_PROBE_OFFSET_FROM_EXTRUDER -25
-  #define Y_PROBE_OFFSET_FROM_EXTRUDER -29
-  #define Z_PROBE_OFFSET_FROM_EXTRUDER -12.35
+  // #define X_PROBE_OFFSET_FROM_EXTRUDER -25
+  // #define Y_PROBE_OFFSET_FROM_EXTRUDER -29
+  // #define Z_PROBE_OFFSET_FROM_EXTRUDER -12.35
 
   #define Z_RAISE_BEFORE_HOMING 5       // (in mm) Raise Z before homing (G28) for Probe Clearance.
                                         // Be sure you have this distance over your Z_MAX_POS in case
@@ -461,7 +461,7 @@ your extruder heater takes 2 minutes to hit the target on heating.
 //#define EEPROM_SETTINGS
 //to disable EEPROM Serial responses and decrease program space by ~1700 byte: comment this out:
 // please keep turned on if you can.
-//#define EEPROM_CHITCHAT
+#define EEPROM_CHITCHAT
 
 // Host Keepalive
 //
@@ -469,7 +469,7 @@ your extruder heater takes 2 minutes to hit the target on heating.
 // every couple of seconds when it can't accept commands.
 //
 #ifndef HEATBED_ANALYSIS
-#define HOST_KEEPALIVE_FEATURE    // Disable this if your host doesn't like keepalive messages
+// #define HOST_KEEPALIVE_FEATURE    // Disable this if your host doesn't like keepalive messages
 #endif //HEATBED_ANALYSIS
 #define HOST_KEEPALIVE_INTERVAL 2 // Number of seconds between "busy" messages. Set with M113.
 

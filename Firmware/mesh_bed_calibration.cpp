@@ -41,7 +41,7 @@ float   world2machine_shift[2];
 #define MIN_BED_SENSOR_POINT_RESPONSE_DMR           (2.0f)
 
 //#define Y_MIN_POS_FOR_BED_CALIBRATION (MANUAL_Y_HOME_POS-0.2f)
-#define Y_MIN_POS_FOR_BED_CALIBRATION (Y_MIN_POS)
+#define Y_MIN_POS_FOR_BED_CALIBRATION (Y_MIN_POS + 0.0f) // TODO: Could be useful
 // Distances toward the print bed edge may not be accurate.
 #define Y_MIN_POS_CALIBRATION_POINT_ACCURATE (Y_MIN_POS + 3.f)
 // When the measured point center is out of reach of the sensor, Y coordinate will be ignored
@@ -53,20 +53,7 @@ const float bed_skew_angle_mild = (0.12f * M_PI / 180.f);
 // 0.25 degrees equals to an offset of 1.1mm on 250mm length.
 const float bed_skew_angle_extreme = (0.25f * M_PI / 180.f);
 
-// Positions of the bed reference points in the machine coordinates, referenced to the P.I.N.D.A sensor.
-// The points are ordered in a zig-zag fashion to speed up the calibration.
-
 #ifdef HEATBED_V2
-
-/**
- * [0,0] bed print area point X coordinate in bed coordinates ver. 05d/24V
- */
-#define BED_PRINT_ZERO_REF_X 2.f
-/**
- * [0,0] bed print area point Y coordinate in bed coordinates ver. 05d/24V
- */
-#define BED_PRINT_ZERO_REF_Y 9.4f
-
 /**
  * @brief Positions of the bed reference points in print area coordinates. ver. 05d/24V
  *
@@ -76,20 +63,19 @@ const float bed_skew_angle_extreme = (0.25f * M_PI / 180.f);
  * MK2: center front, center right, center rear, center left.
  * MK25 and MK3: front left, front right, rear right, rear left
  */
-const float bed_ref_points_4[] PROGMEM = {
-	37.f - BED_PRINT_ZERO_REF_X - X_PROBE_OFFSET_FROM_EXTRUDER - SHEET_PRINT_ZERO_REF_X,
-	18.4f - BED_PRINT_ZERO_REF_Y - Y_PROBE_OFFSET_FROM_EXTRUDER - SHEET_PRINT_ZERO_REF_Y,
+const float bed_ref_points_4[] PROGMEM = {                                                   
+	BED_REF_POINT0_X,
+	BED_REF_POINT0_Y,
 
-	245.f - BED_PRINT_ZERO_REF_X - X_PROBE_OFFSET_FROM_EXTRUDER  - SHEET_PRINT_ZERO_REF_X,
-	18.4f - BED_PRINT_ZERO_REF_Y - Y_PROBE_OFFSET_FROM_EXTRUDER - SHEET_PRINT_ZERO_REF_Y,
+	BED_REF_POINT1_X,
+	BED_REF_POINT1_Y,
 
-	245.f - BED_PRINT_ZERO_REF_X - X_PROBE_OFFSET_FROM_EXTRUDER  - SHEET_PRINT_ZERO_REF_X,
-	210.4f - BED_PRINT_ZERO_REF_Y - Y_PROBE_OFFSET_FROM_EXTRUDER - SHEET_PRINT_ZERO_REF_Y,
+	BED_REF_POINT2_X,
+	BED_REF_POINT2_Y,
 
-	37.f - BED_PRINT_ZERO_REF_X - X_PROBE_OFFSET_FROM_EXTRUDER  - SHEET_PRINT_ZERO_REF_X,
-	210.4f - BED_PRINT_ZERO_REF_Y - Y_PROBE_OFFSET_FROM_EXTRUDER - SHEET_PRINT_ZERO_REF_Y
+	BED_REF_POINT3_X,
+	BED_REF_POINT3_Y
 };
-
 #else
 
 // Positions of the bed reference points in the machine coordinates, referenced to the P.I.N.D.A sensor.
@@ -868,7 +854,7 @@ void world2machine_read_valid(float vec_x[2], float vec_y[2], float cntr[2])
  */
 void world2machine_initialize()
 {
-#if 0
+#if 1
     SERIAL_ECHOLNPGM("world2machine_initialize");
 #endif
     float vec_x[2];
@@ -876,7 +862,7 @@ void world2machine_initialize()
     float cntr[2];
     world2machine_read_valid(vec_x, vec_y, cntr);
     world2machine_update(vec_x, vec_y, cntr);
-#if 0
+#if 1
     SERIAL_ECHOPGM("world2machine_initialize() loaded: ");
     MYSERIAL.print(world2machine_rotation_and_skew[0][0], 5);
     SERIAL_ECHOPGM(", ");
@@ -954,7 +940,7 @@ bool find_bed_induction_sensor_point_z(float minimum_z, uint8_t n_iter, int
 #ifdef TMC2130
 	FORCE_HIGH_POWER_START;
 #endif
-	//printf_P(PSTR("Min. Z: %f\n"), minimum_z);
+	printf_P(PSTR("Min. Z: %f\n"), minimum_z);
 	#ifdef SUPPORT_VERBOSITY
     if(verbosity_level >= 10) SERIAL_ECHOLNPGM("find bed induction sensor point z");
 	#endif // SUPPORT_VERBOSITY
@@ -970,13 +956,13 @@ bool find_bed_induction_sensor_point_z(float minimum_z, uint8_t n_iter, int
     update_current_position_z();
     if (! endstop_z_hit_on_purpose())
 	{
-		//printf_P(PSTR("endstop not hit 1, current_pos[Z]: %f \n"), current_position[Z_AXIS]);
+		printf_P(PSTR("endstop not hit 1, current_pos[Z]: %f \n"), current_position[Z_AXIS]);
 		goto error;
 	}
 #ifdef TMC2130
 	if (!READ(Z_TMC2130_DIAG))
 	{
-		//printf_P(PSTR("crash detected 1, current_pos[Z]: %f \n"), current_position[Z_AXIS]);
+		printf_P(PSTR("crash detected 1, current_pos[Z]: %f \n"), current_position[Z_AXIS]);
 		goto error; //crash Z detected
 	}
 #endif //TMC2130
@@ -988,13 +974,13 @@ bool find_bed_induction_sensor_point_z(float minimum_z, uint8_t n_iter, int
 		go_to_current(homing_feedrate[Z_AXIS]/60);
 		// Move back down slowly to find bed.
         current_position[Z_AXIS] = minimum_z;
-		//printf_P(PSTR("init Z = %f, min_z = %f, i = %d\n"), z_bckp, minimum_z, i);
+		printf_P(PSTR("init Z = %f, min_z = %f, i = %d\n"), z_bckp, minimum_z, i);
         go_to_current(homing_feedrate[Z_AXIS]/(4*60));
         // we have to let the planner know where we are right now as it is not where we said to go.
         update_current_position_z();
-		//printf_P(PSTR("Zs: %f, Z: %f, delta Z: %f"), z_bckp, current_position[Z_AXIS], (z_bckp - current_position[Z_AXIS]));
+		printf_P(PSTR("Zs: %f, Z: %f, delta Z: %f"), z_bckp, current_position[Z_AXIS], (z_bckp - current_position[Z_AXIS]));
 		if (fabs(current_position[Z_AXIS] - z_bckp) < 0.025) {
-			//printf_P(PSTR("PINDA triggered immediately, move Z higher and repeat measurement\n")); 
+			printf_P(PSTR("PINDA triggered immediately, move Z higher and repeat measurement\n")); 
 			current_position[Z_AXIS] += 0.5;
 			go_to_current(homing_feedrate[Z_AXIS]/60);
 			current_position[Z_AXIS] = minimum_z;
@@ -1007,25 +993,25 @@ bool find_bed_induction_sensor_point_z(float minimum_z, uint8_t n_iter, int
 
 		if (!endstop_z_hit_on_purpose())
 		{
-			//printf_P(PSTR("i = %d, endstop not hit 2, current_pos[Z]: %f \n"), i, current_position[Z_AXIS]);
+			printf_P(PSTR("i = %d, endstop not hit 2, current_pos[Z]: %f \n"), i, current_position[Z_AXIS]);
 			goto error;
 		}
 #ifdef TMC2130
 		if (!READ(Z_TMC2130_DIAG)) {
-			//printf_P(PSTR("crash detected 2, current_pos[Z]: %f \n"), current_position[Z_AXIS]);
+			printf_P(PSTR("crash detected 2, current_pos[Z]: %f \n"), current_position[Z_AXIS]);
 			goto error; //crash Z detected
 		}
 #endif //TMC2130
-//        SERIAL_ECHOPGM("Bed find_bed_induction_sensor_point_z low, height: ");
-//        MYSERIAL.print(current_position[Z_AXIS], 5);
-//        SERIAL_ECHOLNPGM("");
+        SERIAL_ECHOPGM("Bed find_bed_induction_sensor_point_z low, height: ");
+        MYSERIAL.print(current_position[Z_AXIS], 5);
+        SERIAL_ECHOLNPGM("");
 		float dz = i?fabs(current_position[Z_AXIS] - (z / i)):0;
         z += current_position[Z_AXIS];
-		//printf_P(PSTR("Z[%d] = %d, dz=%d\n"), i, (int)(current_position[Z_AXIS] * 1000), (int)(dz * 1000));
-		//printf_P(PSTR("Z- measurement deviation from avg value %f um\n"), dz);
+		printf_P(PSTR("Z[%d] = %d, dz=%d\n"), i, (int)(current_position[Z_AXIS] * 1000), (int)(dz * 1000));
+		printf_P(PSTR("Z- measurement deviation from avg value %f um\n"), dz);
 		if (dz > 0.05) { //deviation > 50um
 			if (high_deviation_occured == false) { //first occurence may be caused in some cases by mechanic resonance probably especially if printer is placed on unstable surface 
-				//printf_P(PSTR("high dev. first occurence\n"));
+				printf_P(PSTR("high dev. first occurence\n"));
 				delay_keep_alive(500); //damping
 				//start measurement from the begining, but this time with higher movements in Z axis which should help to reduce mechanical resonance
 				high_deviation_occured = true;
@@ -1036,7 +1022,7 @@ bool find_bed_induction_sensor_point_z(float minimum_z, uint8_t n_iter, int
 				goto error;
 			}
 		}
-		//printf_P(PSTR("PINDA triggered at %f\n"), current_position[Z_AXIS]);
+		printf_P(PSTR("PINDA triggered at %f\n"), current_position[Z_AXIS]);
     }
     current_position[Z_AXIS] = z;
     if (n_iter > 1)
@@ -1045,7 +1031,7 @@ bool find_bed_induction_sensor_point_z(float minimum_z, uint8_t n_iter, int
 
     enable_endstops(endstops_enabled);
     enable_z_endstop(endstop_z_enabled);
-//    SERIAL_ECHOLNPGM("find_bed_induction_sensor_point_z 3");
+    SERIAL_ECHOLNPGM("find_bed_induction_sensor_point_z 3");
 #ifdef TMC2130
 	FORCE_HIGH_POWER_END;
 #endif
@@ -1053,7 +1039,7 @@ bool find_bed_induction_sensor_point_z(float minimum_z, uint8_t n_iter, int
 	return true;
 
 error:
-//    SERIAL_ECHOLNPGM("find_bed_induction_sensor_point_z 4");
+    SERIAL_ECHOLNPGM("find_bed_induction_sensor_point_z 4");
     enable_endstops(endstops_enabled);
     enable_z_endstop(endstop_z_enabled);
 #ifdef TMC2130
@@ -1069,9 +1055,9 @@ BedSkewOffsetDetectionResultType xyzcal_find_bed_induction_sensor_point_xy();
 // Search around the current_position[X,Y],
 // look for the induction sensor response.
 // Adjust the  current_position[X,Y,Z] to the center of the target dot and its response Z coordinate.
-#define FIND_BED_INDUCTION_SENSOR_POINT_X_RADIUS (8.f)
-#define FIND_BED_INDUCTION_SENSOR_POINT_Y_RADIUS (4.f)
-#define FIND_BED_INDUCTION_SENSOR_POINT_XY_STEP  (1.f)
+#define FIND_BED_INDUCTION_SENSOR_POINT_X_RADIUS (8.0f) //TODO
+#define FIND_BED_INDUCTION_SENSOR_POINT_Y_RADIUS (4.0f)
+#define FIND_BED_INDUCTION_SENSOR_POINT_XY_STEP  (0.5f)
 #ifdef HEATBED_V2
 #define FIND_BED_INDUCTION_SENSOR_POINT_Z_STEP   (2.f)
 #define FIND_BED_INDUCTION_SENSOR_POINT_MAX_Z_ERROR  (0.03f)

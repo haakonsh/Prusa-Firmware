@@ -265,10 +265,8 @@ extern void planner_reset_position();
 extern void planner_abort_hard();
 extern bool planner_aborted;
 
-#ifdef PREVENT_DANGEROUS_EXTRUDE
 extern int extrude_min_temp;
 void set_extrude_min_temp(int temp);
-#endif
 
 void reset_acceleration_rates();
 #endif

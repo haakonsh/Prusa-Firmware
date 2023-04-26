@@ -6,7 +6,6 @@
 /*------------------------------------
  GENERAL SETTINGS
  *------------------------------------*/
-
 // Printer revision
 #define PRINTER_TYPE PRINTER_MK3S
 #define PRINTER_NAME PRINTER_MK3S_NAME
@@ -19,7 +18,7 @@
 #define DEVELOPER
 
 // Printer name
-#define CUSTOM_MENDEL_NAME "Prusa i3 MK3S"
+#define CUSTOM_MENDEL_NAME "Not again!"
 
 // Electronics
 #define MOTHERBOARD BOARD_EINSY_1_0a
@@ -29,22 +28,123 @@
 // PSU
 #define PSU_Delta                                 // uncomment if DeltaElectronics PSU installed
 
-
-// Uncomment the below for the E3D PT100 temperature sensor (with or without PT100 Amplifier)
-//#define E3D_PT100_EXTRUDER_WITH_AMP
-//#define E3D_PT100_EXTRUDER_NO_AMP
-//#define E3D_PT100_BED_WITH_AMP
-//#define E3D_PT100_BED_NO_AMP
-
-
 /*------------------------------------
  AXIS SETTINGS
  *------------------------------------*/
+#define NUM_AXIS 4 // The axis order in all axis related arrays is X, Y, Z, E
+#define HOMING_FEEDRATE {3000, 3000, 800, 0}  // set the homing speeds (mm/min) // 3000 is also valid for stallGuard homing. Valid range: 2200 - 3000
+
+// BED_ZERO_REF_X/Y are the machine coordinates when the nozzle is zeroed to the bed's print area (0;0)
+#define BED_ZERO_REF_X 2.5f	//(- 22.f + X_PROBE_OFFSET_FROM_EXTRUDER) // -22 + 23 = 1
+#define BED_ZERO_REF_Y 7.5f	//(- 0.6f + Y_PROBE_OFFSET_FROM_EXTRUDER + 4.f) // -0.6 + 5 + 4 = 8.4
+/** [0,0] bed print area point X coordinate in bed coordinates ver. 05d/24V */
+#define BED_PRINT_ZERO_REF_X 0.0f //2.0f
+/** [0,0] bed print area point Y coordinate in bed coordinates ver. 05d/24V */
+#define BED_PRINT_ZERO_REF_Y 0.0f //9.4f
+/** [0,0] steel sheet print area point X coordinate in bed print area coordinates */
+#define SHEET_PRINT_ZERO_REF_X 0.0f
+/** [0,0] steel sheet print area point Y coordinate in bed print area coordinates */
+#define SHEET_PRINT_ZERO_REF_Y 0.0f
+
+#define X_BED_SIZE 250
+#define Y_BED_SIZE 210
+/** Directly specify the bed size. 
+ * This allows Marlin to do extra logic related to the bed size when it differs from the movement limits below. 
+ * If the XY carriage is able to move outside of the bed, you can specify a wider range below.*/
+
+// Travel limits after homing: 0 - MAX
+#define X_MAX_POS X_BED_SIZE 
+#define X_MIN_POS -BED_ZERO_REF_X
+#define Y_MAX_POS Y_BED_SIZE // 212
+#define Y_MIN_POS -BED_ZERO_REF_Y //orig -4
+#define Z_MAX_POS 210
+#define Z_MIN_POS 0.15
+/** The above defines the printable area of the 3d printer after homing.
+For the X and Y axis you just measure the travel length of the nozzle from the home position. 
+The maximum travel length will either be restricted by the size of the buildplatform or by the maximum travel distance of the axis.
+
+When setting up the Z axis for the first time, it is best to set the Z axis travel length 
+a bit shorter than what is measured until a software and hardware test of the 3d printer is completed.
+
+This will help to avoid accidentally crashing the build bed into the hot end during initial tests. 
+The Z axis travel length can be fine tuned later after the tests have been satisfied.
+
+The measurement units are in millimeters and are defined from line 249 for the maximum positions in the Marlin firmware configuration file.
+The minimum positions can be left at the default 0 for this configuration **/
+ 
+/** Another definition:
+These values specify the physical limits of the machine. 
+Usually the [XYZ]_MIN_POS values are set to 0, because endstops are positioned at the bed limits. 
+[XYZ]_MAX_POS should be set to the farthest reachable point. 
+By default, these are used as your homing positions as well. 
+However, the MANUAL_[XYZ]_HOME_POS options can be used to override these, if needed. **/
+
+// Home position
+#define MANUAL_X_HOME_POS 0
+#define MANUAL_Y_HOME_POS -2.2
+#define MANUAL_Z_HOME_POS 0.2
+
+//#define DEFAULT_Y_OFFSET    4.f // Default distance of Y_MIN_POS point from endstop, when the printer is not calibrated.
+
+#define X_PROBE_OFFSET_FROM_EXTRUDER (31.0)  // Z probe to nozzle X offset: -left  +right
+#define Y_PROBE_OFFSET_FROM_EXTRUDER (12.5)  // Z probe to nozzle Y offset: -front +behind
+#define Z_PROBE_OFFSET_FROM_EXTRUDER (-0.4)  // Z probe to nozzle Z offset: -below (always!)
+
+/**
+ * @brief Positions of the bed reference points in print area coordinates. ver. 05d/24V
+ *
+ * Numeral constants are in bed coordinates, subtracting macro defined values converts it to print area coordinates.
+ *
+ * The points are the following: front left, front right, rear right, rear left 
+ **/                                                                                                              //NEW    //MK3S originals                                               
+#define BED_REF_POINT0_X	35.5f - BED_PRINT_ZERO_REF_X - X_PROBE_OFFSET_FROM_EXTRUDER - SHEET_PRINT_ZERO_REF_X   // 4.5   //37.0
+#define BED_REF_POINT0_Y	8.5f  - BED_PRINT_ZERO_REF_Y - Y_PROBE_OFFSET_FROM_EXTRUDER - SHEET_PRINT_ZERO_REF_Y   //-4     //18.4
+
+#define BED_REF_POINT1_X	243.0f - BED_PRINT_ZERO_REF_X - X_PROBE_OFFSET_FROM_EXTRUDER - SHEET_PRINT_ZERO_REF_X  // 212   //245.0
+#define BED_REF_POINT1_Y	8.5f   - BED_PRINT_ZERO_REF_Y - Y_PROBE_OFFSET_FROM_EXTRUDER - SHEET_PRINT_ZERO_REF_Y  //-4     //18.4
+
+#define BED_REF_POINT2_X	243.0f - BED_PRINT_ZERO_REF_X - X_PROBE_OFFSET_FROM_EXTRUDER - SHEET_PRINT_ZERO_REF_X  // 212   //245.0
+#define BED_REF_POINT2_Y	200.5f - BED_PRINT_ZERO_REF_Y - Y_PROBE_OFFSET_FROM_EXTRUDER - SHEET_PRINT_ZERO_REF_Y  // 188   //210.4
+
+#define BED_REF_POINT3_X	35.5f  - BED_PRINT_ZERO_REF_X - X_PROBE_OFFSET_FROM_EXTRUDER - SHEET_PRINT_ZERO_REF_X  // 4.5   //37.0
+#define BED_REF_POINT3_Y	200.5f - BED_PRINT_ZERO_REF_Y - Y_PROBE_OFFSET_FROM_EXTRUDER - SHEET_PRINT_ZERO_REF_Y  // 188   //210.4
+
+#define BED_X0 1     //(2.f - BED_ZERO_REF_X) //1
+#define BED_Y0 1     //(9.4f - BED_ZERO_REF_Y) //1
+#define BED_Xn 205   //(206.f - BED_ZERO_REF_X) //205
+#define BED_Yn 205   //(213.4f - BED_ZERO_REF_Y) //205
+
+#define BED_X(i, n) ((float)i * (BED_Xn - BED_X0) / (n - 1) + BED_X0)
+#define BED_Y(i, n) ((float)i * (BED_Yn - BED_Y0) / (n - 1) + BED_Y0)
+
+// Radius used in function 'xyzcal_searchZ' to find approx Z-axis position of bed reference point.
+#define XYZ_CAL_SEARCH_RADIUS 450 // Default 900
+
+// Mesh definitions 1;1 - 205;205 + probe offset
+#define MESH_MIN_X (BED_X0 + X_PROBE_OFFSET_FROM_EXTRUDER)   //31   //24 orig probe nozzle offset?
+#define MESH_MAX_X (BED_Xn + X_PROBE_OFFSET_FROM_EXTRUDER)   //228
+#define MESH_MIN_Y (BED_Y0 + Y_PROBE_OFFSET_FROM_EXTRUDER)   //12   //6 
+#define MESH_MAX_Y (BED_Y0 + Y_PROBE_OFFSET_FROM_EXTRUDER)   //210
+
+#define MESH_HOME_Z_CALIB 0.2
+#define MESH_HOME_Z_SEARCH 5.0f           // Z lift for homing, mesh bed leveling etc.
+
+// Backlash - 
+//#define BACKLASH_X
+//#define BACKLASH_Y
+
+// Canceled home position
+#define X_CANCEL_POS 50
+#define Y_CANCEL_POS 190
+#define Z_CANCEL_LIFT 50
+
+//Pause print position
+#define X_PAUSE_POS 50
+#define Y_PAUSE_POS 190
+#define Z_PAUSE_LIFT 20
 
 // Steps per unit {X,Y,Z,E}
-//#define DEFAULT_AXIS_STEPS_PER_UNIT   {100,100,3200/8,140}
 #define DEFAULT_AXIS_STEPS_PER_UNIT   {100,100,3200/8,786.5}
-//#define DEFAULT_AXIS_STEPS_PER_UNIT   {100,100,3200/8,560}
 
 // Endstop inverting
 #define X_MIN_ENDSTOP_INVERTING 0 // set to 1 to invert the logic of the endstop.
@@ -59,48 +159,11 @@
 #define INVERT_E1_DIR 0    // for direct drive extruder v9 set to 1, for geared extruder set to 0
 #define INVERT_E2_DIR 0   // for direct drive extruder v9 set to 1, for geared extruder set to 0
 
-// Home position
-#define MANUAL_X_HOME_POS 0
-#define MANUAL_Y_HOME_POS -2.2
-#define MANUAL_Z_HOME_POS 0.2
-
-// Travel limits after homing
-#define X_MAX_POS 255
-#define X_MIN_POS 0
-#define Y_MAX_POS 212.5
-#define Y_MIN_POS -4 //orig -4
-#define Z_MAX_POS 210
-#define Z_MIN_POS 0.15
-
-// Canceled home position
-#define X_CANCEL_POS 50
-#define Y_CANCEL_POS 190
-#define Z_CANCEL_LIFT 50
-
-//Pause print position
-#define X_PAUSE_POS 50
-#define Y_PAUSE_POS 190
-#define Z_PAUSE_LIFT 20
-
-#define NUM_AXIS 4 // The axis order in all axis related arrays is X, Y, Z, E
-#define HOMING_FEEDRATE {3000, 3000, 800, 0}  // set the homing speeds (mm/min) // 3000 is also valid for stallGuard homing. Valid range: 2200 - 3000
-
-//#define DEFAULT_Y_OFFSET    4.f // Default distance of Y_MIN_POS point from endstop, when the printer is not calibrated.
-/**
- * [0,0] steel sheet print area point X coordinate in bed print area coordinates
- */
-#define SHEET_PRINT_ZERO_REF_X 0.f
-/**
- * [0,0] steel sheet print area point Y coordinate in bed print area coordinates
- */
-#define SHEET_PRINT_ZERO_REF_Y -2.f
-
 #define DEFAULT_MAX_FEEDRATE                {200, 200, 12, 120}      // (mm/sec)   max feedrate (M203)
 #define DEFAULT_MAX_FEEDRATE_SILENT         {100, 100, 12, 120}      // (mm/sec)   max feedrate (M203), silent mode
 
 #define DEFAULT_MAX_ACCELERATION            {1000, 1000, 200, 5000}  // (mm/sec^2) max acceleration (M201)
 #define DEFAULT_MAX_ACCELERATION_SILENT     {960, 960, 200, 5000}    // (mm/sec^2) max acceleration (M201), silent mode
-
 
 #define DEFAULT_ACCELERATION          1250   // X, Y, Z and E max acceleration in mm/s^2 for printing moves (M204P)
 #define DEFAULT_RETRACT_ACCELERATION  1250   // X, Y, Z and E max acceleration in mm/s^2 for retracts (M204R)
@@ -135,7 +198,7 @@
 #define UVLO_SUPPORT
 
 // Fan check
-#define FANCHECK
+//#define FANCHECK
 
 // Safety timer
 #define SAFETYTIMER
@@ -143,21 +206,17 @@
 #define FARM_DEFAULT_SAFETYTIMER_TIME_ms (45*60*1000ul)
 
 // Offline crash dumper
-#define XFLASH_DUMP     // enable dump functionality (including D20/D21/D22)
-#define MENU_DUMP       // enable "Memory dump" in Settings menu
-#define EMERGENCY_DUMP  // trigger crash on stack corruption and WDR
+// #define XFLASH_DUMP     // enable dump functionality (including D20/D21/D22)
+// #define MENU_DUMP       // enable "Memory dump" in Settings menu
+// #define EMERGENCY_DUMP  // trigger crash on stack corruption and WDR
 
 // Online crash dumper
-//#define EMERGENCY_SERIAL_DUMP   // Request dump via serial on stack corruption and WDR
-//#define MENU_SERIAL_DUMP        // Enable "Memory dump" in Settings menu
+#define EMERGENCY_SERIAL_DUMP   // Request dump via serial on stack corruption and WDR
+#define MENU_SERIAL_DUMP        // Enable "Memory dump" in Settings menu
 
 // Filament sensor
 #define FILAMENT_SENSOR
 #define IR_SENSOR
-
-// Backlash - 
-//#define BACKLASH_X
-//#define BACKLASH_Y
 
 
 // Minimum ambient temperature limit to start triggering MINTEMP errors [C]
@@ -171,13 +230,13 @@
 #define DEBUG_DCODE3
 #define DEBUG_DCODE6
 
-// #define DEBUG_BUILD     //Uncomment to disable DEBUG mode
+#define DEBUG_BUILD     //Uncomment to disable DEBUG mode
 //#define DEBUG_SEC_LANG   //secondary language debug output at startup
 //#define DEBUG_XFLASH   //debug external spi flash
 #ifdef DEBUG_BUILD
 //#define _NO_ASM
 #define DEBUG_DCODES //D codes
-#define DEBUG_STACK_MONITOR        //Stack monitor in stepper ISR
+// #define DEBUG_STACK_MONITOR        //Stack monitor in stepper ISR
 //#define DEBUG_FSENSOR_LOG          //Reports fsensor status to serial
 //#define DEBUG_CRASHDET_COUNTERS  //Display crash-detection counters on LCD
 //#define DEBUG_RESUME_PRINT       //Resume/save print debug enable 
@@ -189,31 +248,28 @@
 //#define DEBUG_DISABLE_ZMINLIMIT  //z min limit ignored
 //#define DEBUG_DISABLE_ZMAXLIMIT  //z max limit ignored
 #define DEBUG_DISABLE_STARTMSGS //no startup messages 
-#define DEBUG_DISABLE_MINTEMP   //mintemp error ignored
-//#define DEBUG_DISABLE_SWLIMITS  //sw limits ignored
+//#define DEBUG_DISABLE_MINTEMP   //mintemp error ignored
+// #define DEBUG_DISABLE_SWLIMITS  //sw limits ignored
 //#define DEBUG_DISABLE_LCD_STATUS_LINE  //empty four lcd line
-//#define DEBUG_DISABLE_PREVENT_EXTRUDER //cold extrusion and long extrusion allowed
+#define DEBUG_DISABLE_PREVENT_EXTRUDER //cold extrusion and long extrusion allowed
 //#define DEBUG_DISABLE_PRUSA_STATISTICS //disable prusa_statistics() mesages
 //#define DEBUG_DISABLE_FORCE_SELFTEST //disable force selftest
 //#define DEBUG_XSTEP_DUP_PIN 21   //duplicate x-step output to pin 21 (SCL on P3)
 //#define DEBUG_YSTEP_DUP_PIN 21   //duplicate y-step output to pin 21 (SCL on P3)
-#define DEBUG_DISABLE_FANCHECK     //disable fan check (no ISR INT7, check disabled)
+// #define DEBUG_DISABLE_FANCHECK     //disable fan check (no ISR INT7, check disabled)
 //#define DEBUG_DISABLE_FSENSORCHECK //disable fsensor check (no ISR INT7, check disabled)
-#define DEBUG_DUMP_TO_2ND_SERIAL   //dump received characters to 2nd serial line
+// #define DEBUG_DUMP_TO_2ND_SERIAL   //dump received characters to 2nd serial line
 #define DEBUG_STEPPER_TIMER_MISSED // Stop on stepper timer overflow, beep and display a message.
-#define PLANNER_DIAGNOSTICS // Show the planner queue status on printer display.
-#define CMD_DIAGNOSTICS //Show cmd queue length on printer display
+// #define PLANNER_DIAGNOSTICS // Show the planner queue status on printer display.
+// #define CMD_DIAGNOSTICS //Show cmd queue length on printer display
 #endif /* DEBUG_BUILD */
 
 //#define FSENSOR_QUALITY
-
 
 #define LINEARITY_CORRECTION
 #define TMC2130_LINEARITY_CORRECTION
 #define TMC2130_LINEARITY_CORRECTION_XYZ
 #define TMC2130_VARIABLE_RESOLUTION
-
-
 
 /*------------------------------------
  TMC2130 default settings
@@ -284,10 +340,10 @@
 #define TMC2130_SG_THRS_HOME {3, 3, TMC2130_SG_THRS_Z, TMC2130_SG_THRS_E}
 
 //new settings is possible for vsense = 1, running current value > 31 set vsense to zero and shift both currents by 1 bit right (Z axis only)
-#define TMC2130_CURRENTS_H {16, 20, 35, 30}  // default holding currents for all axes
+#define TMC2130_CURRENTS_H {21, 21, 35, 30}  // default holding currents for all axes
 #define TMC2130_CURRENTS_FARM 36             // E 805 mA peak for ECool/farm mode
-#define TMC2130_CURRENTS_R {16, 20, 35, 30}  // default running currents for all axes
-#define TMC2130_CURRENTS_R_HOME {8, 10, 20, 18}  // homing running currents for all axes
+#define TMC2130_CURRENTS_R {21, 21, 35, 30}  // default running currents for all axes
+#define TMC2130_CURRENTS_R_HOME {11, 11, 20, 18}  // homing running currents for all axes
 
 #define TMC2130_STEALTH_Z
 #define TMC2130_DEDGE_STEPPING
@@ -297,7 +353,6 @@
 //#define TMC2130_DEBUG
 //#define TMC2130_DEBUG_WR
 //#define TMC2130_DEBUG_RD
-
 
 /*------------------------------------
  EXTRUDER SETTINGS
@@ -362,7 +417,6 @@
 #define FANCHECK_AUTO_PRINT_FAN_THRS 70 //[RPS] - Used during selftest to identify swapped fans automatically
 #define FANCHECK_AUTO_FAIL_THRS 20 //[RPS] - Used during selftest to identify a faulty fan
 
-
 /*------------------------------------
  LOAD/UNLOAD FILAMENT SETTINGS
  *------------------------------------*/
@@ -414,7 +468,6 @@
 #define DIFFERENTIAL_ADC_GAIN_FACTOR 10   // 10x gain
 #define DIFFERENTIAL_ADC_RANGE (DIFFERENTIAL_ADC_GAIN_FACTOR*511) // Gain * ( 2^(10-1) - 1) Sign bit offsets range by 511
 #define DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTORS 4700.0 // Ohm  TODO: Calibrate value
-//#define DIFFERENTIAL_ADC_REFERENCE_RESISTOR 640.0 // Ohm   TODO: Calibrate value
 #define DIFFERENTIAL_ADC_REFERENCE_RESISTOR 103000.0 // Ohm   TODO: Calibrate value
 #define DIFFERENTIAL_ADC_REFERENCE_RESISTOR_RATIO (DIFFERENTIAL_ADC_REFERENCE_RESISTOR/(DIFFERENTIAL_ADC_REFERENCE_RESISTOR + DIFFERENTIAL_ADC_VOLTAGE_DIVIDER_RESISTORS))
 // Steinhart-Hart equation coefficients. Note: These coefficients are calculated for one unique thermistor!
@@ -452,9 +505,7 @@
 #define U_ ((DIFFERENTIAL_ADC_V / 10) * (A_ / B_))
 #define UU_ (U_ * U_)
 #define W_ (U_ * PT1000_R0)
-
 #endif //   HEATER_0_USES_PT1000_DIFF_10X_GAIN
-
 
 // Define Prusa filament runout sensor
 #define FILAMENT_RUNOUT_SUPPORT
@@ -496,7 +547,6 @@
 #define TEMP_MODEL_CAL_Th 230 // Default calibration working temperature (C)
 #define TEMP_MODEL_CAL_Tl 50  // Default calibration cooling temperature (C)
 
-
 /*------------------------------------
  MOTOR CURRENT SETTINGS
  *------------------------------------*/
@@ -514,12 +564,6 @@
 
 #define MBL_Z_STEP 0.01
 
-// Mesh definitions
-#define MESH_MIN_X 31
-#define MESH_MAX_X 228
-#define MESH_MIN_Y 12
-#define MESH_MAX_Y 210
-
 // Mesh upsample definition
 #define MESH_NUM_X_POINTS 7
 #define MESH_NUM_Y_POINTS 7
@@ -529,14 +573,7 @@
 
 // Maximum bed level correction value
 #define BED_ADJUSTMENT_UM_MAX 100
-
-#define MESH_HOME_Z_CALIB 0.2
-#define MESH_HOME_Z_SEARCH 5.0f           // Z lift for homing, mesh bed leveling etc.
-
-#define X_PROBE_OFFSET_FROM_EXTRUDER 30.6     // Z probe to nozzle X offset: -left  +right
-#define Y_PROBE_OFFSET_FROM_EXTRUDER 11.6     // Z probe to nozzle Y offset: -front +behind
-#define Z_PROBE_OFFSET_FROM_EXTRUDER -0.4  // Z probe to nozzle Z offset: -below (always!)
-#endif
+#endif //MESH_BED_LEVELING
 
 // Bed Temperature Control
 // Select PID or bang-bang with PIDTEMPBED. If bang-bang, BED_LIMIT_SWITCHING will enable hysteresis
@@ -563,7 +600,6 @@
 #define BED_OFFSET_START 40
 #define BED_OFFSET_CENTER 50
 
-
 #ifdef PIDTEMPBED
 //120v 250W silicone heater into 4mm borosilicate (MendelMax 1.5+)
 //from FOPDT model - kp=.39 Tp=405 Tdead=66, Tc set to 79.2, aggressive factor of .15 (vs .1, 1, 10)
@@ -578,11 +614,6 @@
 #define  DEFAULT_bedKd 924.76
 #endif
 
-//120v 250W silicone heater into 4mm borosilicate (MendelMax 1.5+)
-//from pidautotune
-//    #define  DEFAULT_bedKp 97.1
-//    #define  DEFAULT_bedKi 1.41
-//    #define  DEFAULT_bedKd 1675.16
 
 // FIND YOUR OWN: "M303 E-1 C8 S90" to run autotune on the bed at 90 degreesC for 8 cycles.
 #endif // PIDTEMPBED
@@ -669,22 +700,22 @@
 
 
 #if defined(E3D_PT100_EXTRUDER_WITH_AMP)
-#define TEMP_SENSOR_0 247
+#  define TEMP_SENSOR_0 247
 #elif defined(E3D_PT100_EXTRUDER_NO_AMP)
-#define TEMP_SENSOR_0 148
+#  define TEMP_SENSOR_0 148
 #elif defined(HEATER_0_USES_PT1000_DIFF_10X_GAIN)
-#define TEMP_SENSOR_0 HEATER_0_USES_PT1000_DIFF_10X_GAIN
+#  define TEMP_SENSOR_0 HEATER_0_USES_PT1000_DIFF_10X_GAIN
 #else
-#define TEMP_SENSOR_0 5
+#  define TEMP_SENSOR_0 5
 #endif
-#define TEMP_SENSOR_1 5
+#define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #if defined(E3D_PT100_BED_WITH_AMP)
-#define TEMP_SENSOR_BED 247
+#  define TEMP_SENSOR_BED 247
 #elif defined(E3D_PT100_BED_NO_AMP)
-#define TEMP_SENSOR_BED 148
+#  define TEMP_SENSOR_BED 148
 #else
-#define TEMP_SENSOR_BED 1
+#  define TEMP_SENSOR_BED 1
 #endif
 #define TEMP_SENSOR_PINDA 1
 #define TEMP_SENSOR_AMBIENT 2000
@@ -726,8 +757,7 @@
 
 #define DEFAULT_PID_TEMP 210
 
-#define MIN_PRINT_FAN_SPEED 75
-
+#define MIN_PRINT_FAN_SPEED 50
 
 // How much shall the print head be lifted on power panic?
 // Ideally the Z axis will reach a zero phase of the stepper driver on power outage. To simplify this,
@@ -748,7 +778,7 @@
 
 #define M600_TIMEOUT 600  //seconds
 
-//#define SUPPORT_VERBOSITY
+#define SUPPORT_VERBOSITY
 
 #define MMU_FILAMENT_COUNT 5
 

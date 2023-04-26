@@ -187,11 +187,11 @@ uint8_t xyzcal_dm = 0;
 
 void xyzcal_update_pos(uint16_t dx, uint16_t dy, uint16_t dz, uint16_t)
 {
-//	DBG(_n("xyzcal_update_pos dx=%d dy=%d dz=%d dir=%02x\n"), dx, dy, dz, xyzcal_dm);
+	// DBG(_n("xyzcal_update_pos dx=%d dy=%d dz=%d dir=%02x\n"), dx, dy, dz, xyzcal_dm);
 	if (xyzcal_dm&1) count_position[0] -= dx; else count_position[0] += dx;
 	if (xyzcal_dm&2) count_position[1] -= dy; else count_position[1] += dy;
 	if (xyzcal_dm&4) count_position[2] -= dz; else count_position[2] += dz;
-//	DBG(_n(" after xyzcal_update_pos x=%ld y=%ld z=%ld\n"), count_position[0], count_position[1], count_position[2]);
+	// DBG(_n(" after xyzcal_update_pos x=%ld y=%ld z=%ld\n"), count_position[0], count_position[1], count_position[2]);
 }
 
 uint16_t xyzcal_sm4_delay = 0;
@@ -248,7 +248,7 @@ uint16_t xyzcal_calc_delay(uint16_t, uint16_t)
 /// check_pinda == -1: stop when PINDA untriggered
 bool xyzcal_lineXYZ_to(int16_t x, int16_t y, int16_t z, uint16_t delay_us, int8_t check_pinda)
 {
-//	DBG(_n("xyzcal_lineXYZ_to x=%d y=%d z=%d  check=%d\n"), x, y, z, check_pinda);
+	// DBG(_n("xyzcal_lineXYZ_to x=%d y=%d z=%d  check=%d\n"), x, y, z, check_pinda);
 	x -= (int16_t)count_position[0];
 	y -= (int16_t)count_position[1];
 	z -= (int16_t)count_position[2];
@@ -712,7 +712,7 @@ bool xyzcal_searchZ(void) {
 //	int16_t dz = 100;
 	while (z > -2300) { //-6mm + 0.25mm
 		uint16_t ad = 0;
-		if (xyzcal_spiral8(x0, y0, z, 100, 900, 320, 1, &ad)) { //dz=100 radius=900 delay=400
+		if (xyzcal_spiral8(x0, y0, z, 100, XYZ_CAL_SEARCH_RADIUS, 320, 1, &ad)) { //dz=100 radius=XYZ_CAL_SEARCH_RADIUS delay=400
 			//@size=82
 			DBG(_n(" ON-SIGNAL at x=%d y=%d z=%d ad=%d\n"), _X, _Y, _Z, ad);
 
@@ -835,12 +835,12 @@ void dynamic_circle(uint8_t *matrix_32x32, float &x, float &y, float &r, uint8_t
 	float shifts_y[blocks];	
 	float shifts_r[blocks];	
 
-	// DBG(_n(" [%f, %f][%f] start circle\n"), x, y, r);
+	DBG(_n(" [%f, %f][%f] start circle\n"), x, y, r);
 
 	for (int8_t i = iterations; i > 0; --i){
 	
         //@size=128B
-		// DBG(_n(" [%f, %f][%f] circle\n"), x, y, r);
+		DBG(_n(" [%f, %f][%f] circle\n"), x, y, r);
 
 		/// read points on the circle
 		for (uint8_t p = 0; p < num_points; ++p){
@@ -1000,7 +1000,7 @@ BedSkewOffsetDetectionResultType xyzcal_scan_and_process(){
 }
 
 BedSkewOffsetDetectionResultType xyzcal_find_bed_induction_sensor_point_xy(void) {
-    // DBG(_n("xyzcal_find_bed_induction_sensor_point_xy x=%ld y=%ld z=%ld\n"), count_position[X_AXIS], count_position[Y_AXIS], count_position[Z_AXIS]);
+    DBG(_n("xyzcal_find_bed_induction_sensor_point_xy x=%ld y=%ld z=%ld\n"), count_position[X_AXIS], count_position[Y_AXIS], count_position[Z_AXIS]);
 	BedSkewOffsetDetectionResultType ret = BED_SKEW_OFFSET_DETECTION_POINT_NOT_FOUND;
 	xyzcal_meassure_enter();
 	if (xyzcal_searchZ())

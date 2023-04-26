@@ -125,6 +125,8 @@ static uint8_t g_cntr_planner_queue_min = 0;
 //===========================================================================
 #ifdef PREVENT_DANGEROUS_EXTRUDE
 int extrude_min_temp = EXTRUDE_MINTEMP;
+#else
+int extrude_min_temp = 0;
 #endif
 
 #ifdef LIN_ADVANCE

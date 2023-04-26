@@ -44,6 +44,7 @@
  */
 
 //-//
+#include "Configuration_prusa.h"
 #include "Configuration.h"
 #include "Marlin.h"
 #include "config.h"
@@ -2539,7 +2540,7 @@ static void gcode_G28(bool home_x_axis, long home_x_value, bool home_y_axis, lon
 	st_synchronize();
 	homing_flag = true;
 
-#if 0
+#if 1
 	SERIAL_ECHOPGM("G28, initial ");  print_world_coordinates();
 	SERIAL_ECHOPGM("G28, initial ");  print_physical_coordinates();
 #endif
@@ -10081,8 +10082,8 @@ void bed_check(float x_dimension, float y_dimension, int x_points_num, int y_poi
 	float output;
 
 	int mesh_point = 0; //index number of calibration point
-	float bed_zero_ref_x = (-22.f + X_PROBE_OFFSET_FROM_EXTRUDER); //shift between zero point on bed and target and between probe and nozzle
-	float bed_zero_ref_y = (-0.6f + Y_PROBE_OFFSET_FROM_EXTRUDER);
+	float bed_zero_ref_x = BED_ZERO_REF_X;  //(-22.f + X_PROBE_OFFSET_FROM_EXTRUDER); //shift between zero point on bed and target and between probe and nozzle
+	float bed_zero_ref_y = BED_ZERO_REF_Y;  //(-0.6f + Y_PROBE_OFFSET_FROM_EXTRUDER);
 
 	float mesh_home_z_search = 4;
 	float measure_z_height = 0.2f;
@@ -10272,8 +10273,8 @@ void bed_analysis(float x_dimension, float y_dimension, int x_points_num, int y_
 	float output;
 
 	int mesh_point = 0; //index number of calibration point
-	float bed_zero_ref_x = (-22.f + X_PROBE_OFFSET_FROM_EXTRUDER); //shift between zero point on bed and target and between probe and nozzle
-	float bed_zero_ref_y = (-0.6f + Y_PROBE_OFFSET_FROM_EXTRUDER);
+	float bed_zero_ref_x = BED_ZERO_REF_X //(-22.f + X_PROBE_OFFSET_FROM_EXTRUDER); //shift between zero point on bed and target and between probe and nozzle
+	float bed_zero_ref_y = BED_ZERO_REF_Y //(-0.6f + Y_PROBE_OFFSET_FROM_EXTRUDER);
 
 	float mesh_home_z_search = 4;
 	float row[x_points_num];
